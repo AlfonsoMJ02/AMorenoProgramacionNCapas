@@ -1,0 +1,18 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div><span th:if="${param.operacion == 'Suma'}"></span> La suma de <span th:text="${numero1}"></span> y <span th:text="${numero2}"></span> es: <span th:text="${resultado}"></span></div>
+        
+        <div><span th:if="${param.operacion == 'Resta'}"></span>La resta de <span th:text="${numero1}"></span> y <span th:text="${numero2}"></span> es: <span th:text="${resultado}"></span></div>
+        
+        <div><span th:if="${param.operacion == 'Multiplicacion'}"></span>La multiplicación de <span th:text="${numero1}"></span> y <span th:text="${numero2}"></span> es: <span th:text="${resultado}"></span></div>
+        
+        <div><span th:if="${param.operacion == 'Division'}"></span>La división de <span th:text="${numero1}"></span> y <span th:text="${numero2}"></span> es: <span th:text="${resultado}"></span></div>
+       
+    </body>
+</html>
