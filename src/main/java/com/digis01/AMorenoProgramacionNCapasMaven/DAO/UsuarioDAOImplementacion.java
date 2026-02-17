@@ -35,10 +35,7 @@ public class UsuarioDAOImplementacion implements IUsuario{
 
                             int idUsuario = resultSet.getInt("IdUsuario");
 
-                            if (!result.objects.isEmpty()
-                            && idUsuario == result.objects
-                                    .get(result.objects.size() - 1)
-                                    .getIdUsuario()) {
+                            if (!result.objects.isEmpty() && idUsuario == result.objects.get(result.objects.size() - 1).getIdUsuario()) {
 
                                 Direccion direccion = new Direccion();
                                 direccion.setIdDireccion(resultSet.getInt("IdDireccion"));
@@ -106,6 +103,30 @@ public class UsuarioDAOImplementacion implements IUsuario{
                                     direccion.setCalle(resultSet.getString("Calle"));
                                     direccion.setNumeroInterior(resultSet.getString("NumeroInterior"));
                                     direccion.setNumeroExterior(resultSet.getString("NumeroExterior"));
+                                    usuario.getDirecciones().add(direccion);
+                                    
+                                    Colonia colonia = new Colonia();
+                                    colonia.setIdColonia(resultSet.getInt("IdColonia"));
+                                    colonia.setNombre(resultSet.getString("NombreColonia"));
+                                    colonia.setCodigoPostal(resultSet.getString("CodigoPostal"));
+
+                                    Municipio municipio = new Municipio();
+                                    municipio.setIdMunicipio(resultSet.getInt("IdMunicipio"));
+                                    municipio.setNombre(resultSet.getString("NombreMunicipio"));
+
+                                    Estado estado = new Estado();
+                                    estado.setIdEstado(resultSet.getInt("IdEstado"));
+                                    estado.setNombre(resultSet.getString("NombreEstado"));
+
+                                    Pais pais = new Pais();
+                                    pais.setIdPais(resultSet.getInt("IdPais"));
+                                    pais.setNombre(resultSet.getString("NombrePais"));
+
+                                    estado.setPais(pais);
+                                    municipio.setEstado(estado);
+                                    colonia.setMunicipio(municipio);
+                                    direccion.setColonia(colonia);
+
                                     usuario.getDirecciones().add(direccion);
                                 }
 

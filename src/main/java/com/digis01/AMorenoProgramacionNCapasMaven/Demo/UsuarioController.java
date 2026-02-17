@@ -12,7 +12,7 @@ import com.digis01.AMorenoProgramacionNCapasMaven.ML.Pais;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Rol;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
-import javax.naming.Binding;
+import java.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/Usuario")
@@ -92,16 +94,34 @@ class UsuarioController {
     }
     
     @PostMapping("Form")
-    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult, Model model){
-        usuario.setPais(new Pais());
-        usuario.setRol(new Rol());
+    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult,@RequestParam("imagenFile") MultipartFile imagenFile, Model model){
         
         if (bindingResult.hasErrors()) {
+
             Result resultRol = rol.GetAll();
-            model.addAttribute("usuario", usuario);
+            Result resultPais = pais.GetAll();
+            Result resultEstado = estado.GetAll(usuario.getPais().getIdPais());
+            Result resultMunicipio = municipio.GetAll(usuario.getEstado().getIdEstado());
+            Result resultColonia = colonia.GetAll(usuario.getMunicipio().getIdMunicipio());
+
             model.addAttribute("roles", resultRol.objects);
+            model.addAttribute("paises", resultPais.objects);
+            model.addAttribute("estados", resultEstado.objects);
+            model.addAttribute("municipios", resultMunicipio.objects);
+            model.addAttribute("colonias", resultColonia.objects);
+
             return "Formulario";
         }
+        
+        if (imagenFile == null || imagenFile.isEmpty()) {
+
+            bindingResult.rejectValue("Image", "error.usuario", "Debes seleccionar una imagen");
+
+        } else {
+
+            bindingResult.rejectValue("Image", "error.usuario", "Si hay imagen");
+        }
+        
         return "redirect:/Usuario";
     }
 

@@ -1,7 +1,12 @@
 package com.digis01.AMorenoProgramacionNCapasMaven.ML;
 
+import jakarta.validation.constraints.Min;
+
 public class Pais {
+    
+    @Min(value = 0, message = "Selecciona un pais")
     private Integer IdPais;
+    
     private String Nombre;
     
     public Pais(){
