@@ -146,6 +146,33 @@ public class UsuarioDAOImplementacion implements IUsuario{
 
         return result;
     }
+    
+    public Result<Usuario> Delete(int idUsuario) {
+
+        Result<Usuario> result = new Result<>();
+
+        try {
+
+            jdbcTemplate.execute("{CALL UsuarioDeleteSP(?)}",
+                    (CallableStatementCallback<Boolean>) callableStatement -> {
+
+                        callableStatement.setInt(1, idUsuario);
+                        callableStatement.execute();
+
+                        result.correct = true;
+                        return true;
+                    });
+
+        } catch (Exception ex) {
+
+            result.correct = false;
+            result.errorMessage = ex.getMessage();
+            result.ex = ex;
+        }
+
+        return result;
+    }
+
 
     public Result<Usuario> Add(Usuario usuario) {
 

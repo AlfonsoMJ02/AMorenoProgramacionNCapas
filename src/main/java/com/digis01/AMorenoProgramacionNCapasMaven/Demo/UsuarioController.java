@@ -113,14 +113,21 @@ class UsuarioController {
             return "Formulario";
         }
         
-        if (imagenFile == null || imagenFile.isEmpty()) {
-
-            bindingResult.rejectValue("Image", "error.usuario", "Debes seleccionar una imagen");
-
-        } else {
-
-            bindingResult.rejectValue("Image", "error.usuario", "Si hay imagen");
+        String nombreArchivo = imagenFile.getOriginalFilename();
+        String[] cadena = nombreArchivo.split("\\.");
+        if (cadena[1].equals("jpg") || cadena[1].equals("png")) {
+            System.out.println("Imagen");
+            try {
+                byte[] arregloBytes = imagenFile.getBytes();
+                String base64Img = Base64.getEncoder().encodeToString(arregloBytes);
+                usuario.setImage(base64Img);
+            } catch (Exception e) {
+                return "Formulario";
+            }
+        }else if (imagenFile != null){
+            System.out.println("Error");
         }
+        System.out.println("Agregar");
         
         return "redirect:/Usuario";
     }
@@ -142,7 +149,22 @@ class UsuarioController {
 
         return "Usuario";
     }
+    
+    @GetMapping("/EditarUsuario")
+    public String EditarUsuario(Model model){
+        return "EditarUsuario";
+    }
+    
 
+    @GetMapping("/Delete/{idUsuario}")
+    public String Delete(@PathVariable int idUsuario) {
+
+        dao.Delete(idUsuario);
+
+        return "redirect:/Usuario";
+    }
+
+    
     @Autowired
     private EstadoDAOImplementacion estado;
 

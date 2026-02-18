@@ -175,7 +175,7 @@
                                                     th:text="${rol.nombre}">
                                             </option>
                                         </select>
-                                        <span class="text-danger" th:if="${#fields.hasErrors('Rol')}" th:errors="*{Rol}"></span>
+                                        <span class="text-danger" th:if="${#fields.hasErrors('Rol.IdRol')}" th:errors="*{Rol.IdRol}"></span>
                                     </div>
                                 </div>
                             </div>
@@ -194,7 +194,8 @@
 
                                     <div class="col-md-4">
                                         <label for="email" class="form-label">Calle:</label>
-                                        <input type="text" class="form-control" id="usuario" name="usuario">
+                                        <input type="text" class="form-control" id="usuario" name="usuario" th:field="*{direccion.Calle}">
+                                        <span class="text-danger" th:if="${#fields.hasErrors('direccion.Calle')}" th:errors="*{direccion.Calle}"></span>
                                     </div>
 
                                     <div class="col-md-4">
@@ -204,7 +205,8 @@
 
                                     <div class="col-md-4">
                                         <label for="usuario" class="form-label">Número exterior:</label>
-                                        <input type="text" class="form-control" id="usuario" name="usuario">
+                                        <input type="text" class="form-control" id="usuario" name="usuario" th:field="*{direccion.NumeroExterior}">
+                                        <span class="text-danger" th:if="${#fields.hasErrors('direccion.NumeroExterior')}" th:errors="*{direccion.NumeroExterior}">text</span>
                                     </div>
 
                                     <div class="col-md-4">
@@ -216,7 +218,11 @@
 
                                     <div class="col-md-4">
                                         <label for="celular" class="form-label">CP:</label>
-                                        <input type="tel" class="form-control" id="celular" name="celular">
+                                        <input class="form-control" name="codigpoPostal" th:field="*{colonia.CodigoPostal}">
+                                        <span class="text-danger"
+                                              th:if="${#fields.hasErrors('colonia.CodigoPostal')}"
+                                              th:errors="*{colonia.CodigoPostal}">
+                                        </span>
                                     </div>
 
                                     <div class="col-md-4">

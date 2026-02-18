@@ -3,14 +3,113 @@
     <title>Usuarios del sistema</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 
 <body>
 <div class="container mt-4">
+    
+    
+    
+        <div class="modal fade" id="EditarUsuario" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar usuario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        
+                    <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="col-md-8">
+                                <div class="row g-3">
 
+                                    <div class="col-md-4">
+                                        <label for="nombre" class="form-label">Nombre:</label>
+                                        <input id="nombre" onpaste="return false;" type="text" class="form-control">
+                                        
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label for="apellidoPaterno" class="form-label">Apellido Paterno:</label>
+                                        <input id="nombre" type="text" class="form-control">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="apellidoMaterno" class="form-label">Apellido Materno:</label>
+                                        <input id="nombre" type="text" class="form-control">
+     
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                    <label>Sexo:</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                                
+                                               value="Hombre" 
+                                               id="radioDefault1">
+                                        <label class="form-check-label" for="radioDefault1">
+                                            Hombre
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                                
+                                               value="Mujer" 
+                                               id="radioDefault2">
+                                        <label class="form-check-label" for="radioDefault2">
+                                            Mujer
+                                        </label>
+                                    </div>
+                                    
+                                </div> 
+                                    <div class="col-md-4">
+                                        <label for="curp" class="form-label">CURP:</label>
+                                        <input type="text" class="form-control" id="curp" name="curp" maxlength="18">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="fechaNacimiento" class="form-label">Fecha de nacimiento:</label>
+                                        <input type="date" 
+                                               class="form-control" 
+                                               id="fechaNacimiento" 
+                                               name="fecha_nacimiento"                                               
+                                               onkeydown="return false">                                       
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="PreguntaEliminar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p><strong>¿Estas seguro que quieres eliminar este usuario?</strong></p>
+                
+                <a id="btnEliminarConfirmado"
+                   class="btn btn-danger btn-sm">
+                   Eliminar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
     <h1 class="text-primary fw-bold text-center mb-4">Usuarios del sistema</h1>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -37,11 +136,16 @@
                 <tr th:each="usuario : ${usuarios}">
 
                     <td class="text-center align-top">
-                        <a class="btn btn-warning btn-sm mb-2">
+                        <a class="btn btn-warning btn-sm mb-2" data-bs-toggle="modal"
+                           data-bs-target="#EditarUsuario"
+                           th:attr="data-id=${usuario.idUsuario}">
                             <i class="bi bi-pencil-square"></i>
                         </a>
                         <br>
-                        <a class="btn btn-danger btn-sm">
+                        <a class="btn btn-danger btn-sm"
+                           data-bs-toggle="modal"
+                           data-bs-target="#PreguntaEliminar"
+                           th:attr="data-id=${usuario.idUsuario}">
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>
@@ -208,5 +312,17 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    var modal = document.getElementById('PreguntaEliminar');
+
+    modal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var id = button.getAttribute('data-id');
+
+        var btnEliminar = document.getElementById('btnEliminarConfirmado');
+        btnEliminar.href = '/Usuario/Delete/' + id;
+    });
+</script>
 </body>
 </html>

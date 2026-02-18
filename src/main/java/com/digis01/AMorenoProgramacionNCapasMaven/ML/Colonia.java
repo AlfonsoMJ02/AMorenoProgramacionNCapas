@@ -1,9 +1,13 @@
 package com.digis01.AMorenoProgramacionNCapasMaven.ML;
 
+import jakarta.validation.constraints.NotEmpty;
+
 public class Colonia {
     
     private int IdColonia;
     private String Nombre;
+    
+    @NotEmpty(message = "Este campo no puede estar vacio")
     private String CodigoPostal;
     
     public Colonia(){

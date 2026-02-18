@@ -1,10 +1,15 @@
 package com.digis01.AMorenoProgramacionNCapasMaven.ML;
 
+import jakarta.validation.constraints.NotEmpty;
+
 public class Direccion {
     
     private int IdDireccion;
+    
+    @NotEmpty(message = "Este campo no  puede estar vacio")
     private String Calle;
     private String NumeroInterior;
+    @NotEmpty(message = "Este campo no puede estar vacio")
     private String NumeroExterior;
     
     public Colonia Colonia;

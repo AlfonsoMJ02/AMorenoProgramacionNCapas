@@ -35,7 +35,7 @@ public class Usuario {
     private String Email;
     
     
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+=!]).{8,}$", message = "Este campo debe contener almenos un número, una letra mayúscula, una mínuscula y un caracter especial")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+=!]).{8,}$", message = "Este campo debe contener al menos un número, una letra mayúscula, una mínuscula y un caracter especial")
     @NotEmpty(message = "Este campo no puede estar vacio")
     @Size(min = 2, max = 20, message = "Debe tener más de 2 Digitos minimo y maximo 20")
     private String Password;
@@ -48,9 +48,9 @@ public class Usuario {
     @Size(min = 10, max = 10, message = "Debe tener maximo 10 números")
     private String Telefono;
     
-    @Pattern(regexp = "^[0-9]{10}$", message = "Este campo solo debe contener numeros")
-    @NotNull(message = "Este campo no puede estar vacio")
-    @Size(min = 10, max = 10, message = "Debe tener maximo 10 números")
+    //@Pattern(regexp = "^[0-9]{10}$", message = "Este campo solo debe contener numeros")
+    //@NotEmpty(message = "Este campo no puede estar vacio")
+    //@Size(min = 10, max = 10, message = "Debe tener maximo 10 números")
     private String Celular;
     
     @Pattern(regexp = "^[A-Z][AEIOU][A-Z]{2}\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])[HM](AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS)[A-Z]{3}[A-Z0-9]\\d$", message = "CURP inválida")
@@ -86,8 +86,9 @@ public class Usuario {
     @Valid
     private Colonia colonia;
     
-    
+    @Valid
     private Direccion direccion;
+    
     private List<Direccion> Direcciones;
     
     public Colonia getColonia() {
