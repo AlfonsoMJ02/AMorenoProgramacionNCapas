@@ -103,7 +103,7 @@ public class UsuarioDAOImplementacion implements IUsuario{
                                     direccion.setCalle(resultSet.getString("Calle"));
                                     direccion.setNumeroInterior(resultSet.getString("NumeroInterior"));
                                     direccion.setNumeroExterior(resultSet.getString("NumeroExterior"));
-                                    usuario.getDirecciones().add(direccion);
+                                    
                                     
                                     Colonia colonia = new Colonia();
                                     colonia.setIdColonia(resultSet.getInt("IdColonia"));
@@ -147,6 +147,65 @@ public class UsuarioDAOImplementacion implements IUsuario{
         return result;
     }
     
+    public Result<Usuario> GetById(int idUsuario) {
+
+        Result<Usuario> result = new Result<>();
+
+        try {
+
+            jdbcTemplate.execute("{CALL UsuarioGetByIdSP(?,?)}",
+                    (CallableStatementCallback<Boolean>) callableStatement -> {
+
+                        callableStatement.registerOutParameter(1, oracle.jdbc.OracleTypes.CURSOR);
+                        callableStatement.setInt(2, idUsuario);
+
+                        callableStatement.execute();
+
+                        ResultSet resultSet = (ResultSet) callableStatement.getObject(1);
+
+                        if (resultSet.next()) {
+
+                            Usuario usuario = new Usuario();
+                            usuario.setRol(new Rol());
+
+                            usuario.setUserName(resultSet.getString("UserName"));
+                            usuario.setNombre(resultSet.getString("NombreUsuario"));
+                            usuario.setApellidoPaterno(resultSet.getString("ApellidoPaterno"));
+                            usuario.setApellidoMaterno(resultSet.getString("ApellidoMaterno"));
+                            usuario.setEmail(resultSet.getString("Email"));
+                            usuario.setPassword(resultSet.getString("Password"));
+
+                            usuario.setFechaNacimiento(
+                                    resultSet.getDate("FechaNacimiento") != null
+                                    ? resultSet.getDate("FechaNacimiento").toLocalDate()
+                                    : null
+                            );
+
+                            usuario.setSexo(resultSet.getString("Sexo"));
+                            usuario.setTelefono(resultSet.getString("Telefono"));
+                            usuario.setCelular(resultSet.getString("Celular"));
+                            usuario.setCurp(resultSet.getString("CURP"));
+                            
+                            usuario.getRol().setIdRol(resultSet.getInt("IdRol"));
+                            usuario.getRol().setNombre(resultSet.getString("NombreRol"));
+
+                            result.object = usuario;
+                            result.correct = true;
+
+                        }
+
+                        return true;
+                    });
+
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getMessage();
+            result.ex = ex;
+        }
+
+        return result;
+    }
+    
     public Result<Usuario> Delete(int idUsuario) {
 
         Result<Usuario> result = new Result<>();
@@ -170,6 +229,26 @@ public class UsuarioDAOImplementacion implements IUsuario{
             result.ex = ex;
         }
 
+        return result;
+    }
+    
+    public Result<Usuario> DeleteDireccion(int idDireccion){
+        Result<Usuario> result = new Result<>();
+        
+        try {
+            jdbcTemplate.execute("{CALL DireccionDeleteSP(?)}", 
+                    (CallableStatementCallback<Boolean>) callableStatement -> {
+                        callableStatement.setInt(1, idDireccion);
+                        callableStatement.execute();
+                        
+                        result.correct = true;
+                        return true;
+                    });
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getMessage();
+            result.ex = ex;
+        }
         return result;
     }
 
@@ -224,5 +303,8 @@ public class UsuarioDAOImplementacion implements IUsuario{
     public Result ADDSP() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
+    
+ 
 
 }

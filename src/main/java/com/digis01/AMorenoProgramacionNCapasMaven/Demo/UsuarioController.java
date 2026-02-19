@@ -150,8 +150,16 @@ class UsuarioController {
         return "Usuario";
     }
     
+    @GetMapping("/GetById/{id}")
+    @ResponseBody
+    public Result<Usuario> GetById(@PathVariable int id) {
+        return dao.GetById(id);
+    }
+    
     @GetMapping("/EditarUsuario")
     public String EditarUsuario(Model model){
+        
+ 
         return "EditarUsuario";
     }
     
@@ -161,6 +169,12 @@ class UsuarioController {
 
         dao.Delete(idUsuario);
 
+        return "redirect:/Usuario";
+    }
+    
+    @GetMapping("/Direccion/Delete/{idDireccion}")
+    public String DeleteDireccion(@PathVariable int idDireccion){
+        dao.DeleteDireccion(idDireccion);
         return "redirect:/Usuario";
     }
 
