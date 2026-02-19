@@ -27,7 +27,7 @@
 
                         <form>
                             <div class="modal-body">
-
+                                <input type="hidden" id="idUsuario">
                                 <div class="container-fluid">
 
                                     <h6 class="fw-bold text-primary mb-3">
@@ -166,11 +166,14 @@
 
                                         <div class="col-md-4">
                                             <label for="rol" class="form-label">Rol</label>
-                                            <select id="rol" class="form-select">
-                                            <option value="0">Selecciona...</option>
                                             
-                                        </select>
-
+                                            <select id="rol" class="form-select">
+                                                <option value="0">Selecciona...</option>
+                                                <option th:each="rol : ${roles}"
+                                                        th:value="${rol.idRol}"
+                                                        th:text="${rol.nombre}">
+                                                </option>
+                                            </select>
                                         </div>
 
                                     </div>
@@ -283,7 +286,9 @@
 
                                     <div class="col-md-4">
                                         <label class="form-label">Estado:</label>
-                                        
+                                        <select id="municipio" class="form-select" >
+                                            <option value=0>Selecciona...</option>
+                                            </select>
                                     </div>
 
 
@@ -521,44 +526,91 @@
             
             var modalEditar = document.getElementById('EditarUsuario');
 
-        modalEditar.addEventListener('show.bs.modal', function (event) {
+            modalEditar.addEventListener('show.bs.modal', function (event) {
 
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
+                var button = event.relatedTarget;
+                var id = button.getAttribute('data-id');
 
-            fetch('/Usuario/GetById/' + id)
-            .then(response => response.json())
-            .then(data => {
+                fetch('/Usuario/getById?idUsuario=' + id)
+                    .then(response => response.json())
+                    .then(data => {
 
-                console.log(data); 
+                        console.log(data);
 
-                if (data.correct) {
+                        if (data.correct) {
 
-                    var u = data.object;
+                            var u = data.object;
+                            document.getElementById("idUsuario").value = u.IdUsuario;
+                            document.getElementById("nombre").value = u.Nombre || "";
+                            document.getElementById("apellidoPaterno").value = u.ApellidoPaterno || "";
+                            document.getElementById("apellidoMaterno").value = u.ApellidoMaterno || "";
+                            document.getElementById("curp").value = u.Curp || "";
+                            document.getElementById("fechaNacimiento").value = u.FechaNacimiento || "";
 
-                    document.getElementById("nombre").value = u.Nombre;
-                    document.getElementById("apellidoPaterno").value = u.ApellidoPaterno;
-                    document.getElementById("apellidoMaterno").value = u.ApellidoMaterno;
-                    document.getElementById("curp").value = u.Curp;
-                    document.getElementById("fechaNacimiento").value = u.FechaNacimiento;
+                            document.getElementById("email").value = u.Email || "";
+                            document.getElementById("usuario").value = u.UserName || "";
+                            document.getElementById("telefono").value = u.Telefono || "";
+                            document.getElementById("celular").value = u.Celular || "";
 
-                    document.getElementById("email").value = u.Email;
-                    document.getElementById("usuario").value = u.UserName;
-                    document.getElementById("telefono").value = u.Telefono;
-                    document.getElementById("celular").value = u.Celular;
+                            if (u.Sexo === "H") {
+                                document.getElementById("sexoH").checked = true;
+                            } else if (u.Sexo === "M") {
+                                document.getElementById("sexoM").checked = true;
+                            }
+                            
+                            if (u.Rol && u.Rol.IdRol) {
+                                document.getElementById("rol").value = String(u.Rol.IdRol);
+                            }
 
+                        } else {
+                            alert("No se pudo cargar el usuario");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
 
-                    if (u.sexo === "H") {
-                        document.getElementById("sexoH").checked = true;
-                    } else if (u.sexo === "M") {
-                        document.getElementById("sexoM").checked = true;
-                    }
-
-                    document.getElementById("rol").value = u.rol.IdRol;
-                }
             });
-        });
         
+        document.querySelector("#EditarUsuario form")
+.addEventListener("submit", function(e) {
+
+    e.preventDefault();
+
+    let usuario = {
+        IdUsuario: document.getElementById("idUsuario").value,
+        Nombre: document.getElementById("nombre").value,
+        ApellidoPaterno: document.getElementById("apellidoPaterno").value,
+        ApellidoMaterno: document.getElementById("apellidoMaterno").value,
+        Email: document.getElementById("email").value,
+        FechaNacimiento: document.getElementById("fechaNacimiento").value,
+        Password: document.getElementById("password").value,
+        Sexo: document.querySelector("input[name='sexo']:checked")?.value,
+        Telefono: document.getElementById("telefono").value,
+        Celular: document.getElementById("celular").value,
+        Curp: document.getElementById("curp").value,
+        UserName: document.getElementById("usuario").value,
+        Rol: {
+            IdRol: document.getElementById("rol").value
+        }
+    };
+
+    fetch("/Usuario/Update", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(usuario)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.correct) {
+            location.reload();
+        } else {
+            alert("Error: " + data.errorMessage);
+        }
+    });
+});
         
            var modal = document.getElementById('PreguntaEliminar');
 

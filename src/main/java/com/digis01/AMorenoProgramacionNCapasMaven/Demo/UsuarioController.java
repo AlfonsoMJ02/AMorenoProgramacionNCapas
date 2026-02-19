@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -131,7 +132,8 @@ class UsuarioController {
         
         return "redirect:/Usuario";
     }
-
+    
+    
     @Autowired
     private UsuarioDAOImplementacion dao;
 
@@ -139,21 +141,25 @@ class UsuarioController {
     public String GetAll(Model model) {
 
         Result<Usuario> result = dao.GetAll();
+        Result resultRol = rol.GetAll();
 
         if (result.correct) {
             model.addAttribute("usuarios", result.objects);
         } else {
-            model.addAttribute("error", result.errorMessage);
             model.addAttribute("usuarios", new ArrayList<Usuario>());
+        }
+
+        if (resultRol.correct) {
+            model.addAttribute("roles", resultRol.objects);
         }
 
         return "Usuario";
     }
     
-    @GetMapping("/GetById/{id}")
+    @GetMapping("/getById")
     @ResponseBody
-    public Result<Usuario> GetById(@PathVariable int id) {
-        return dao.GetById(id);
+    public Result GetById(@RequestParam int idUsuario){
+        return dao.GetById(idUsuario);
     }
     
     @GetMapping("/EditarUsuario")
@@ -161,6 +167,12 @@ class UsuarioController {
         
  
         return "EditarUsuario";
+    }
+    
+    @PostMapping("/Update")
+    @ResponseBody
+    public Result Update(@RequestBody Usuario usuario) {
+        return dao.Update(usuario);
     }
     
 

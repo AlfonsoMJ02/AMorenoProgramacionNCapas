@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Min;
 
 public class Rol {
     
-    @Min(value = 0, message = "Selecciona un rol")
+    @Min(value = 1, message = "Selecciona un rol")
     private int IdRol;
 
     private String Nombre;
