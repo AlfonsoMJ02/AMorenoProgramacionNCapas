@@ -8,6 +8,7 @@ import com.digis01.AMorenoProgramacionNCapasMaven.DAO.RolDAOImplementacion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Result;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Usuario;
 import com.digis01.AMorenoProgramacionNCapasMaven.DAO.UsuarioDAOImplementacion;
+import com.digis01.AMorenoProgramacionNCapasMaven.ML.Direccion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Pais;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Rol;
 import jakarta.validation.Valid;
@@ -142,6 +143,7 @@ class UsuarioController {
 
         Result<Usuario> result = dao.GetAll();
         Result resultRol = rol.GetAll();
+        Result resultPais = pais.GetAll(); 
 
         if (result.correct) {
             model.addAttribute("usuarios", result.objects);
@@ -151,6 +153,10 @@ class UsuarioController {
 
         if (resultRol.correct) {
             model.addAttribute("roles", resultRol.objects);
+        }
+
+        if (resultPais.correct) {
+            model.addAttribute("paises", resultPais.objects);
         }
 
         return "Usuario";
@@ -175,7 +181,12 @@ class UsuarioController {
         return dao.Update(usuario);
     }
     
-
+    @PostMapping("/Update/Direccion")
+    @ResponseBody
+    public Result UpdateDireccion(@RequestBody Direccion direccion) {
+        return dao.UpdateDireccion(direccion);
+    }
+    
     @GetMapping("/Delete/{idUsuario}")
     public String Delete(@PathVariable int idUsuario) {
 
@@ -184,13 +195,18 @@ class UsuarioController {
         return "redirect:/Usuario";
     }
     
+    @GetMapping("/Direccion/GetById")
+    @ResponseBody
+    public Result GetByIdDireccion(@RequestParam int idDireccion) {
+        return dao.GetByIdDireccion(idDireccion);
+    }
+    
     @GetMapping("/Direccion/Delete/{idDireccion}")
     public String DeleteDireccion(@PathVariable int idDireccion){
         dao.DeleteDireccion(idDireccion);
         return "redirect:/Usuario";
     }
 
-    
     @Autowired
     private EstadoDAOImplementacion estado;
 

@@ -9,32 +9,32 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 @Configuration
 public class DataSourceConfig {
 
-//    @Bean
-//    public DataSource dataSource() {
-//
-//        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-//
-//        dataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-//        dataSource.setUrl("jdbc:oracle:thin:@localhost:1521:ORCL");
-//        dataSource.setUsername("AMorenoProgramacionNCapas");
-//        dataSource.setPassword("password1");
-//
-//        return dataSource;
-//    }
-    
     @Bean
     public DataSource dataSource() {
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
         dataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-        dataSource.setUrl("jdbc:oracle:thin:@localhost:1521:XE");
+        dataSource.setUrl("jdbc:oracle:thin:@localhost:1521:ORCL");
         dataSource.setUsername("AMorenoProgramacionNCapas");
         dataSource.setPassword("password1");
 
         return dataSource;
     }
-
+    
+//    @Bean
+//    public DataSource dataSource() {
+//
+//        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+//
+//        dataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+//        dataSource.setUrl("jdbc:oracle:thin:@localhost:1521:XE");
+//        dataSource.setUsername("AMorenoProgramacionNCapas");
+//        dataSource.setPassword("password1");
+//
+//        return dataSource;
+//    }
+//
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);

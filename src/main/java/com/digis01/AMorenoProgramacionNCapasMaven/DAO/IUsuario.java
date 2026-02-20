@@ -9,4 +9,5 @@ public interface IUsuario {
     Result Update(Usuario usuario);
     Result Add(Usuario usuario);
     Result Delete(int idUsuario);
+    Result GetByIdDireccion(int idDireccion);
 }

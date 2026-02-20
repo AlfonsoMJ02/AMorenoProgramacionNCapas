@@ -1,10 +1,11 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html> 
+  <html xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Usuarios del sistema</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">  
     </head>
 
     <body>
@@ -157,16 +158,12 @@
                                             <label for="celular" class="form-label">Celular</label>
                                             <input type="tel"
                                                    class="form-control"
-                                                   id="celular"
-
-                                                   onkeypress="TelefonoCelular(this, event)"
-                                                   onblur="TelefonoBlur(this)">
+                                                   id="celular">
 
                                         </div>
 
                                         <div class="col-md-4">
                                             <label for="rol" class="form-label">Rol</label>
-                                            
                                             <select id="rol" class="form-select">
                                                 <option value="0">Selecciona...</option>
                                                 <option th:each="rol : ${roles}"
@@ -206,7 +203,7 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Confirmar eliminación</h5>
+                            <h5 class="modal-title">Confirmar eliminación de usuario</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
 
@@ -244,63 +241,62 @@
                                     <h6 class="fw-bold text-success mb-3">
                                         <i class="bi bi-house-check-fill"></i> Datos de dirección
                                     </h6>
-
+                                    <input type="hidden" id="idDireccion">
                                     <div class="row g-3">
-
+                                        
                                         <div class="col-md-4">
-                                        <label for="email" class="form-label">Calle:</label>
-                                        <input type="text" class="form-control" id="usuario" name="usuario">
-                                        
+                                        <label class="form-label">Calle:</label>
+                                        <input type="text" class="form-control" id="calle">
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label for="usuario" class="form-label">Número interior:</label>
-                                        <input type="text" class="form-control" id="usuario" name="usuario">
+                                        <label class="form-label">Número interior:</label>
+                                        <input type="text" class="form-control" id="numeroInterior">
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label for="usuario" class="form-label">Número exterior:</label>
-                                        <input type="text" class="form-control" id="usuario" name="usuario">
+                                        <label class="form-label">Número exterior:</label>
+                                        <input type="text" class="form-control" id="numeroExterior">
+                                    </div>
                                         
+                                    <div class="col-md-4">
+                                        <label class="form-label">País:</label>
+                                        <select id="pais" class="form-select">
+                                        <option value="0">Selecciona...</option>
+                                        <option th:each="pais : ${paises}"
+                                                th:value="${pais.idPais}"
+                                                th:text="${pais.nombre}">
+                                        </option>
+                                    </select>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label class="form-label">Estado:</label>
+                                        <select id="estado" class="form-select">
+                                            <option value="0">Selecciona...</option>
+                                        </select>
+                                        
+                                    </div>
+                                        
+                                    <div class="col-md-4">
+                                        <label class="form-label">Municipio:</label>
+                                        <select id="municipio" class="form-select">
+                                        <option value="0">Selecciona...</option>
+                                        </select>
                                     </div>
 
                                     <div class="col-md-4">
                                         <label class="form-label">Colonia:</label>
-                                        <select id="colonia" class="form-select">
-                                            <option value=0>Selecciona...</option>
+                                        <select id="colonia" class="form-select"}>
+                                        <option value="0">Selecciona...</option>
                                         </select>
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label for="celular" class="form-label">CP:</label>
-                                        <input class="form-control" name="codigpoPostal">
-                                        
+                                        <label class="form-label">CP:</label>
+                                        <input class="form-control" id="codigoPostal">
                                     </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label">Municipio:</label>
-                                        <select id="municipio" class="form-select" >
-                                            <option value=0>Selecciona...</option>
-                                            </select>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label">Estado:</label>
-                                        <select id="municipio" class="form-select" >
-                                            <option value=0>Selecciona...</option>
-                                            </select>
-                                    </div>
-
-
-                                    <div class="col-md-4">
-                                        <label for="pais" class="form-label">País:</label>
-                                        <select id="pais" class="form-select" >
-                                            <option value=0 >Selecciona...</option>
-                                            
-                                        </select>
-                                    </div>
-                                
-
+    
                                     </div>
 
                                 </div>
@@ -325,6 +321,7 @@
                     </div>
                 </div>
             </div>
+            
             
             <!-- Eliminar Direccion Modal -->
             <div class="modal fade" id="PreguntaEliminarDireccion" tabindex="-1">
@@ -471,6 +468,8 @@
                                                     <strong>
                                                         <span th:text="${direccion.calle}"></span>
                                                         #
+                                                        <span th:text="${direccion.numeroInterior}">text</span>
+                                                        #
                                                         <span th:text="${direccion.numeroExterior}"></span>
                                                     </strong>
                                                     -
@@ -519,11 +518,11 @@
             </div>
 
         </div>
-
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-
+        
         <script>
-            
+            //Muestra el modal con la informacion del usuario a editar
             var modalEditar = document.getElementById('EditarUsuario');
 
             modalEditar.addEventListener('show.bs.modal', function (event) {
@@ -539,27 +538,27 @@
 
                         if (data.correct) {
 
-                            var u = data.object;
-                            document.getElementById("idUsuario").value = u.IdUsuario;
-                            document.getElementById("nombre").value = u.Nombre || "";
-                            document.getElementById("apellidoPaterno").value = u.ApellidoPaterno || "";
-                            document.getElementById("apellidoMaterno").value = u.ApellidoMaterno || "";
-                            document.getElementById("curp").value = u.Curp || "";
-                            document.getElementById("fechaNacimiento").value = u.FechaNacimiento || "";
+                            var usuario = data.object;
+                            document.getElementById("idUsuario").value = usuario.IdUsuario;
+                            document.getElementById("nombre").value = usuario.Nombre || "";
+                            document.getElementById("apellidoPaterno").value = usuario.ApellidoPaterno || "";
+                            document.getElementById("apellidoMaterno").value = usuario.ApellidoMaterno || "";
+                            document.getElementById("curp").value = usuario.Curp || "";
+                            document.getElementById("fechaNacimiento").value = usuario.FechaNacimiento || "";
 
-                            document.getElementById("email").value = u.Email || "";
-                            document.getElementById("usuario").value = u.UserName || "";
-                            document.getElementById("telefono").value = u.Telefono || "";
-                            document.getElementById("celular").value = u.Celular || "";
+                            document.getElementById("email").value = usuario.Email || "";
+                            document.getElementById("usuario").value = usuario.UserName || "";
+                            document.getElementById("telefono").value = usuario.Telefono || "";
+                            document.getElementById("celular").value = usuario.Celular || "";
 
-                            if (u.Sexo === "H") {
+                            if (usuario.Sexo === "H") {
                                 document.getElementById("sexoH").checked = true;
-                            } else if (u.Sexo === "M") {
+                            } else if (usuario.Sexo === "M") {
                                 document.getElementById("sexoM").checked = true;
                             }
-                            
-                            if (u.Rol && u.Rol.IdRol) {
-                                document.getElementById("rol").value = String(u.Rol.IdRol);
+
+                            if (usuario.Rol && usuario.Rol.IdRol) {
+                                document.getElementById("rol").value = String(usuario.Rol.IdRol);
                             }
 
                         } else {
@@ -571,58 +570,104 @@
                     });
 
             });
-        
-        document.querySelector("#EditarUsuario form")
-.addEventListener("submit", function(e) {
 
-    e.preventDefault();
 
-    let usuario = {
-        IdUsuario: document.getElementById("idUsuario").value,
-        Nombre: document.getElementById("nombre").value,
-        ApellidoPaterno: document.getElementById("apellidoPaterno").value,
-        ApellidoMaterno: document.getElementById("apellidoMaterno").value,
-        Email: document.getElementById("email").value,
-        FechaNacimiento: document.getElementById("fechaNacimiento").value,
-        Password: document.getElementById("password").value,
-        Sexo: document.querySelector("input[name='sexo']:checked")?.value,
-        Telefono: document.getElementById("telefono").value,
-        Celular: document.getElementById("celular").value,
-        Curp: document.getElementById("curp").value,
-        UserName: document.getElementById("usuario").value,
-        Rol: {
-            IdRol: document.getElementById("rol").value
-        }
-    };
+            //Actualiza la informacion del usuario
+            document.querySelector("#EditarUsuario form")
+            .addEventListener("submit", function(e) {
 
-    fetch("/Usuario/Update", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(usuario)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.correct) {
-            location.reload();
-        } else {
-            alert("Error: " + data.errorMessage);
-        }
-    });
-});
-        
-           var modal = document.getElementById('PreguntaEliminar');
+                e.preventDefault();
 
-           modal.addEventListener('show.bs.modal', function (event) {
+                let usuario = {
+                    IdUsuario: document.getElementById("idUsuario").value,
+                    Nombre: document.getElementById("nombre").value,
+                    ApellidoPaterno: document.getElementById("apellidoPaterno").value,
+                    ApellidoMaterno: document.getElementById("apellidoMaterno").value,
+                    Email: document.getElementById("email").value,
+                    FechaNacimiento: document.getElementById("fechaNacimiento").value,
+                    Password: document.getElementById("password").value,
+                    Sexo: document.querySelector("input[name='sexo']:checked")?.value,
+                    Telefono: document.getElementById("telefono").value,
+                    Celular: document.getElementById("celular").value,
+                    Curp: document.getElementById("curp").value,
+                    UserName: document.getElementById("usuario").value,
+                    Rol: {
+                        IdRol: document.getElementById("rol").value
+                    }
+                };
+
+                fetch("/Usuario/Update", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(usuario)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.correct) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + data.errorMessage);
+                    }
+                });
+            });
+
+
+            var modal = document.getElementById('PreguntaEliminar');
+
+            modal.addEventListener('show.bs.modal', function (event) {
                var button = event.relatedTarget;
                var id = button.getAttribute('data-id');
 
                var btnEliminar = document.getElementById('btnEliminarConfirmado');
                btnEliminar.href = '/Usuario/Delete/' + id;
-           });
+            });
 
-           var modalDireccion = document.getElementById('PreguntaEliminarDireccion');
+
+            //Editar direccion Modal
+            var modalEditarDireccion = document.getElementById('EditarDireccion');
+
+            modalEditarDireccion.addEventListener('show.bs.modal', function (event) {
+
+                var button = event.relatedTarget;
+                var idDireccion = button.getAttribute('data-id');
+
+                fetch('/Usuario/Direccion/GetById?idDireccion=' + idDireccion)
+                    .then(response => response.json())
+                    .then(data => {
+
+                        console.log(data);
+
+                        if (data.correct) {
+
+                            var d = data.object;
+
+                            document.getElementById("idDireccion").value = d.IdDireccion;
+                            document.getElementById("calle").value = d.Calle || "";
+                            document.getElementById("numeroInterior").value = d.NumeroInterior || "";
+                            document.getElementById("numeroExterior").value = d.NumeroExterior || "";
+                            document.getElementById("codigoPostal").value = d.Colonia?.CodigoPostal || "";
+
+                            // Selects
+                            document.getElementById("pais").value = d.Colonia?.Municipio?.Estado?.Pais?.IdPais;
+                            document.getElementById("estado").value = d.Colonia?.Municipio?.Estado?.IdEstado;
+                            document.getElementById("municipio").value = d.Colonia?.Municipio?.IdMunicipio;
+                            document.getElementById("colonia").value = d.Colonia?.IdColonia;
+
+                        } else {
+                            alert("No se pudo cargar la dirección");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+
+            });
+
+
+            //Eliminar direccion modal
+            var modalDireccion = document.getElementById('PreguntaEliminarDireccion');
 
             modalDireccion.addEventListener('show.bs.modal', function (event) {
 
@@ -632,6 +677,164 @@
                 var btnConfirmar = document.getElementById('btnEliminarDireccion');
                 btnConfirmar.href = '/Usuario/Direccion/Delete/' + idDireccion;
             });
+
+
+            //Cargando los selects
+            modalEditarDireccion.addEventListener('show.bs.modal', function (event) {
+
+                var button = event.relatedTarget;
+                var idDireccion = button.getAttribute('data-id');
+
+                fetch('/Usuario/Direccion/GetById?idDireccion=' + idDireccion)
+                    .then(response => response.json())
+                    .then(data => {
+
+                        if (data.correct) {
+
+                            var direccion = data.object;
+
+                            $("#idDireccion").val(direccion.IdDireccion);
+                            $("#calle").val(direccion.Calle);
+                            $("#numeroInterior").val(direccion.NumeroInterior);
+                            $("#numeroExterior").val(direccion.NumeroExterior);
+                            $("#codigoPostal").val(direccion.Colonia.CodigoPostal);
+
+                            $("#pais").val(direccion.Colonia.Municipio.Estado.Pais.IdPais).trigger("change");
+
+                            setTimeout(function () {
+
+                                $("#estado").val(direccion.Colonia.Municipio.Estado.IdEstado).trigger("change");
+
+                                setTimeout(function () {
+
+                                    $("#municipio").val(direccion.Colonia.Municipio.IdMunicipio).trigger("change");
+
+                                    setTimeout(function () {
+
+                                        $("#colonia").val(direccion.Colonia.IdColonia);
+
+                                    }, 400);
+
+                                }, 400);
+
+                            }, 400);
+
+                        } else {
+                            alert("No se pudo cargar la dirección");
+                        }
+                    });
+
+            });
+        
+            $(document).ready(function(){
+                
+                $("#pais").change(function(){
+                    
+                    var idPais = $("#pais").val();
+
+                    if (idPais && idPais !== "0") {
+
+                        $("#estado").empty().append('<option value="">Selecciona...</option>');
+                        $("#municipio").empty().append('<option value="">Selecciona...</option>');
+                        $("#colonia").empty().append('<option value="">Selecciona...</option>');
+
+                        $.ajax({
+                            url: '/Usuario/estado/getByPais/' + idPais,
+                            type: 'GET',
+                            success: function (result) {
+
+                                if (result.correct) {
+                                    $.each(result.objects, function (i, estado) {
+                                        $("#estado").append(
+                                            '<option value="' + estado.IdEstado + '">' 
+                                            + estado.Nombre + 
+                                            '</option>'
+                                        );
+                                    });
+                                }
+                            },
+                            error: function () {
+                                alert("Error al cargar los estados");
+                            }
+                        });
+
+                    } else {
+
+                        $("#estado").empty().append('<option value="0" selected>Selecciona...</option>');
+                        $("#municipio").empty().append('<option value="0" selected>Selecciona...</option>');
+                        $("#colonia").empty().append('<option value="0" selected>Selecciona...</option>');
+                    }
+                    
+                });
+                $("#estado").change(function () {
+
+                var idEstado = $("#estado").val();
+
+                if (idEstado && idEstado !== "0") {
+
+                    $("#municipio").empty().append('<option value="">Selecciona...</option>');
+                    $("#colonia").empty().append('<option value="">Selecciona...</option>');
+
+                    $.ajax({
+                        url: '/Usuario/municipio/getByEstado/' + idEstado,
+                        type: 'GET',
+                        success: function (result) {
+
+                            if (result.correct) {
+                                $.each(result.objects, function (i, municipio) {
+                                    $("#municipio").append(
+                                        '<option value="' + municipio.IdMunicipio + '">' 
+                                        + municipio.Nombre + 
+                                        '</option>'
+                                    );
+                                });
+                            }
+                        },
+                        error: function () {
+                            alert("Error al cargar los municipios");
+                        }
+                    });
+                } else {
+
+                    $("#municipio").empty().append('<option value="0" selected>Selecciona...</option>');
+                    $("#colonia").empty().append('<option value="0" selected>Selecciona...</option>');
+                }
+            });
+
+            $("#municipio").change(function () {
+
+                var idMunicipio = $("#municipio").val();
+
+                if (idMunicipio && idMunicipio !== "0") {
+
+                    $("#colonia").empty().append('<option value="">Selecciona...</option>');
+
+                    $.ajax({
+                        url: '/Usuario/colonia/getByMunicipio/' + idMunicipio,
+                        type: 'GET',
+                        success: function (result) {
+
+                            if (result.correct) {
+                                $.each(result.objects, function (i, colonia) {
+                                    $("#colonia").append(
+                                        '<option value="' + colonia.IdColonia + '">' 
+                                        + colonia.Nombre + 
+                                        '</option>'
+                                    );
+                                });
+                            }
+                        },
+                        error: function () {
+                            alert("Error al cargar las colonias");
+                        }
+                    });
+
+                } else {
+
+                    $("#colonia").empty().append('<option value="0" selected>Selecciona...</option>');
+                }
+            });
+        });
         </script>
     </body>
 </html>
