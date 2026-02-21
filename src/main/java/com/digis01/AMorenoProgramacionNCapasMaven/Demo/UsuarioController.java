@@ -96,42 +96,57 @@ class UsuarioController {
     }
     
     @PostMapping("Form")
-    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult,@RequestParam("imagenFile") MultipartFile imagenFile, Model model){
-        
+    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult, @RequestParam("imagenFile") MultipartFile imagenFile, Model model){
+
         if (bindingResult.hasErrors()) {
 
             Result resultRol = rol.GetAll();
             Result resultPais = pais.GetAll();
-            Result resultEstado = estado.GetAll(usuario.getPais().getIdPais());
-            Result resultMunicipio = municipio.GetAll(usuario.getEstado().getIdEstado());
-            Result resultColonia = colonia.GetAll(usuario.getMunicipio().getIdMunicipio());
 
             model.addAttribute("roles", resultRol.objects);
             model.addAttribute("paises", resultPais.objects);
-            model.addAttribute("estados", resultEstado.objects);
-            model.addAttribute("municipios", resultMunicipio.objects);
-            model.addAttribute("colonias", resultColonia.objects);
 
             return "Formulario";
         }
-        
-        String nombreArchivo = imagenFile.getOriginalFilename();
-        String[] cadena = nombreArchivo.split("\\.");
-        if (cadena[1].equals("jpg") || cadena[1].equals("png")) {
-            System.out.println("Imagen");
-            try {
-                byte[] arregloBytes = imagenFile.getBytes();
-                String base64Img = Base64.getEncoder().encodeToString(arregloBytes);
-                usuario.setImage(base64Img);
-            } catch (Exception e) {
+
+        try {
+            if (imagenFile != null && !imagenFile.isEmpty()) {
+
+                String nombreArchivo = imagenFile.getOriginalFilename();
+
+                String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf(".") + 1).toLowerCase();
+
+                if (extension.equals("jpg") || extension.equals("png")) {
+
+                    byte[] arregloBytes = imagenFile.getBytes();
+                    String base64Img = Base64.getEncoder().encodeToString(arregloBytes);
+
+                    usuario.setImagen(base64Img);
+
+                } else {
+                    System.out.println("Formato no válido");
+                    usuario.setImagen(null);
+                }
+
+            } else {
+               
+                usuario.setImagen(null);
+            }
+
+          
+            Result result = dao.Add(usuario);
+
+            if (result.correct) {
+                return "redirect:/Usuario";
+            } else {
+                model.addAttribute("error", result.errorMessage);
                 return "Formulario";
             }
-        }else if (imagenFile != null){
-            System.out.println("Error");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Formulario";
         }
-        System.out.println("Agregar");
-        
-        return "redirect:/Usuario";
     }
     
     
@@ -181,6 +196,12 @@ class UsuarioController {
         return dao.Update(usuario);
     }
     
+    @PostMapping("/Direccion/Add")
+    @ResponseBody
+    public Result AddDireccion(@RequestBody Direccion direccion) {
+        return dao.AddDireccion(direccion);
+    }
+    
     @PostMapping("/Update/Direccion")
     @ResponseBody
     public Result UpdateDireccion(@RequestBody Direccion direccion) {
@@ -206,7 +227,36 @@ class UsuarioController {
         dao.DeleteDireccion(idDireccion);
         return "redirect:/Usuario";
     }
-
+    
+    @PostMapping("/Imagen/Update")
+    @ResponseBody
+    public Result UpdateImagen(@RequestParam("idUsuario") int idUsuario, @RequestParam("imagenFile") MultipartFile imagenFile){
+        Result result = new Result();
+        
+        try {
+            if (imagenFile != null && !imagenFile.isEmpty()) {
+                if (imagenFile.getContentType().startsWith("image/")) {
+                    byte[] arregloBytes = imagenFile.getBytes();
+                    String base64Img = Base64.getEncoder().encodeToString(arregloBytes);
+                    
+                    result = dao.UpdateImagen(idUsuario, base64Img);
+                }else{
+                    result.correct = false;
+                    result.errorMessage = "Formato no valido";
+                }
+            }else {
+                result.correct = false;
+                result.errorMessage = "No se selecciono ninguna imagen";
+            }
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
+        
+        return result;     
+    }
+    
     @Autowired
     private EstadoDAOImplementacion estado;
 

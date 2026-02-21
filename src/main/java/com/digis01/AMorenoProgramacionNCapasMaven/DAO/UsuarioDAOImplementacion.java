@@ -92,6 +92,7 @@ public class UsuarioDAOImplementacion implements IUsuario{
                                 usuario.setCelular(resultSet.getString("Celular"));
                                 usuario.setCurp(resultSet.getString("Curp"));
                                 usuario.setUserName(resultSet.getString("UserName"));
+                                usuario.setImagen(resultSet.getString("Imagen"));
                                 
                                 usuario.setRol(new Rol());
                                 usuario.getRol().setIdRol(resultSet.getInt("IdRol"));
@@ -224,35 +225,31 @@ public class UsuarioDAOImplementacion implements IUsuario{
 
         try {
 
-            jdbcTemplate.execute("{CALL UsuarioAddSP(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
+            jdbcTemplate.execute("{CALL UsuarioDireccionAddSP(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
                 (CallableStatementCallback<Boolean>) callableStatement -> {
 
                     callableStatement.setString(1, usuario.getNombre());
                     callableStatement.setString(2, usuario.getApellidoPaterno());
                     callableStatement.setString(3, usuario.getApellidoMaterno());
                     callableStatement.setString(4, usuario.getEmail());
-                    callableStatement.setString(5, usuario.getUserName());
+
+
+                    callableStatement.setDate(5, java.sql.Date.valueOf(usuario.getFechaNacimiento()));
+
                     callableStatement.setString(6, usuario.getPassword());
                     callableStatement.setString(7, usuario.getSexo());
                     callableStatement.setString(8, usuario.getTelefono());
                     callableStatement.setString(9, usuario.getCelular());
                     callableStatement.setString(10, usuario.getCurp());
+                    callableStatement.setString(11, usuario.getUserName());
 
-                    callableStatement.setDate(11,
-                        java.sql.Date.valueOf(usuario.getFechaNacimiento()));
+                    callableStatement.setInt(12, usuario.getRol().getIdRol());
+                    callableStatement.setString(13, usuario.getImagen());
 
-                    callableStatement.setInt(12,
-                        usuario.getRol().getIdRol());
-
-                    // Dirección
-                    callableStatement.setString(13,
-                        usuario.getdireccion().getCalle());
-
-                    callableStatement.setString(14,
-                        usuario.getdireccion().getNumeroExterior());
-
-                    callableStatement.setInt(15,
-                        usuario.getColonia().getIdColonia());
+                    callableStatement.setString(14, usuario.getdireccion().getCalle());
+                    callableStatement.setString(15, usuario.getdireccion().getNumeroInterior());
+                    callableStatement.setString(16, usuario.getdireccion().getNumeroExterior());
+                    callableStatement.setInt(17, usuario.getdireccion().getColonia().getIdColonia());
 
                     callableStatement.execute();
 
@@ -435,7 +432,7 @@ public class UsuarioDAOImplementacion implements IUsuario{
             direccion.getCalle(),
             direccion.getNumeroInterior(),
             direccion.getNumeroExterior(),
-            direccion.getColonia()
+            direccion.getColonia().getIdColonia()
             );
             result.correct = true;
         } catch (Exception ex) {
@@ -444,6 +441,55 @@ public class UsuarioDAOImplementacion implements IUsuario{
             result.ex = ex;
         }
         
+        return result;
+    }
+    
+    public Result AddDireccion(Direccion direccion){
+        
+        Result result = new Result();
+        
+        try {
+            jdbcTemplate.update("{CALL DireccionAddSP(?,?,?,?,?)}",
+                    direccion.getCalle(),
+                    direccion.getNumeroInterior(),
+                    direccion.getNumeroExterior(),
+                    direccion.getColonia().getIdColonia(),
+                    direccion.getUsuario().getIdUsuario()
+                    );
+            result.correct = true;
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
+        return result;
+        
+    }
+    
+    public Result UpdateImagen(int idUsuario, String imagenBase64) {
+
+        Result result = new Result();
+
+        try {
+
+            jdbcTemplate.execute("{CALL ImagenUpdateSP(?,?)}",
+                (CallableStatementCallback<Boolean>) callableStatement -> {
+
+                    callableStatement.setInt(1, idUsuario);
+                    callableStatement.setString(2, imagenBase64);
+
+                    callableStatement.execute();
+
+                    result.correct = true;
+                    return true;
+                });
+
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
+
         return result;
     }
 }

@@ -53,7 +53,7 @@ public class Usuario {
     //@Size(min = 10, max = 10, message = "Debe tener maximo 10 números")
     private String Celular;
     
-    @Pattern(regexp = "^[A-Z][AEIOU][A-Z]{2}\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])[HM](AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS)[A-Z]{3}[A-Z0-9]\\d$", message = "CURP inválida")
+    //@Pattern(regexp = "^[A-Z][AEIOU][A-Z]{2}\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])[HM](AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS)[A-Z]{3}[A-Z0-9]\\d$", message = "CURP inválida")
     @NotEmpty(message = "La CURP no puede estar vacía")
     @Size(min = 18, max = 18, message = "La CURP debe tener 18 caracteres")
     private String Curp;
@@ -69,7 +69,7 @@ public class Usuario {
     private LocalDate FechaNacimiento;
     
     
-    public String Image;
+    public String Imagen;
     
     @Valid
     private Rol Rol;
@@ -224,12 +224,12 @@ public class Usuario {
         this.FechaNacimiento = FechaNacimiento;
     }
 
-    public String getImage() {
-        return Image;
+    public String getImagen() {
+        return Imagen;
     }
 
-    public void setImage(String Image) {
-        this.Image = Image;
+    public void setImagen(String Imagen) {
+        this.Imagen = Imagen;
     }
     
     
