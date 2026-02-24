@@ -13,4 +13,5 @@ public interface IUsuario {
     Result GetByIdDireccion(int idDireccion);
     Result AddDireccion(Direccion direccion);
     Result UpdateImagen(int idUsuario, String imagenBase64);
+    Result Search(String nombre, String apellidoPaterno, String apellidoMaterno, Integer idRol);
 }

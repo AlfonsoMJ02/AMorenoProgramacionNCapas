@@ -3,6 +3,7 @@ package com.digis01.AMorenoProgramacionNCapasMaven.DAO;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.*;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import javax.swing.text.StyleConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -492,4 +493,63 @@ public class UsuarioDAOImplementacion implements IUsuario{
 
         return result;
     }
+
+    @Override
+    public Result Search(String nombre, String apellidoPaterno, String apellidoMaterno, Integer idRol) {
+        Result result = new Result();
+        
+        try {
+            jdbcTemplate.execute("{CALL UsuarioSearch(?,?,?,?,?)}",
+                    (CallableStatementCallback<Boolean>) callableStatement -> {
+                    
+                        callableStatement.registerOutParameter(1, oracle.jdbc.OracleTypes.CURSOR);
+                        callableStatement.setString(2, nombre);
+                        callableStatement.setString(3, apellidoPaterno);
+                        callableStatement.setString(4, apellidoMaterno);
+                        if (idRol != null) {
+                            callableStatement.setInt(5, idRol);
+                        }else {
+                            callableStatement.setNull(5, oracle.jdbc.OracleTypes.INTEGER);
+                        }
+                        callableStatement.execute();
+                        
+                        ResultSet resultSet = (ResultSet) callableStatement.getObject(1);
+                        
+                        result.objects = new ArrayList<>();
+                        
+                        while (resultSet.next()){
+                            Usuario usuario = new Usuario();
+                            
+                            usuario.setIdUsuario(resultSet.getInt("IdUsuario"));
+                            usuario.setNombre(resultSet.getString("NombreUsuario"));
+                            usuario.setApellidoPaterno(resultSet.getString("ApellidoPaterno"));
+                            usuario.setApellidoMaterno(resultSet.getString("ApellidoMaterno"));
+                            usuario.setEmail(resultSet.getString("Email"));
+                            
+                            usuario.setSexo(resultSet.getString("Sexo"));
+                            usuario.setTelefono(resultSet.getString("Telefono"));
+                            usuario.setCelular(resultSet.getString("Celular"));
+                            usuario.setCurp(resultSet.getString("Curp"));
+                            usuario.setUserName(resultSet.getString("UserName"));;
+                            usuario.setImagen(resultSet.getString("Imagen"));
+                            
+                            Rol rol = new Rol();
+                            rol.setIdRol(resultSet.getInt("IdRol"));
+                            rol.setNombre(resultSet.getString("NombreRol"));
+                            usuario.setRol(rol);
+                            
+                            result.objects.add(usuario);
+                        }
+                result.correct = true;        
+                return true;
+                    });
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;          
+        }
+        return result;
+    }
+    
+    
 }

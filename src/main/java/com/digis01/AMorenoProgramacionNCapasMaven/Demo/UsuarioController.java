@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/Usuario")
@@ -96,7 +97,7 @@ class UsuarioController {
     }
     
     @PostMapping("Form")
-    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult, @RequestParam("imagenFile") MultipartFile imagenFile, Model model){
+    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult, @RequestParam("imagenFile") MultipartFile imagenFile,RedirectAttributes redirectAttributes, Model model){
 
         if (bindingResult.hasErrors()) {
 
@@ -137,10 +138,11 @@ class UsuarioController {
             Result result = dao.Add(usuario);
 
             if (result.correct) {
+                redirectAttributes.addFlashAttribute("success", true);
                 return "redirect:/Usuario";
             } else {
-                model.addAttribute("error", result.errorMessage);
-                return "Formulario";
+                redirectAttributes.addFlashAttribute("error", true);
+                return "redirect:/Usuario";
             }
 
         } catch (Exception e) {
@@ -149,6 +151,18 @@ class UsuarioController {
         }
     }
     
+    @GetMapping("/Search")
+    public String Search(@RequestParam(required = false) String nombre, @RequestParam(required = false) String apellidoPaterno, @RequestParam(required = false) String apellidoMaterno, @RequestParam(required = false) Integer idRol, Model model) {
+
+        Result result = dao.Search(nombre, apellidoPaterno, apellidoMaterno, idRol);
+
+        model.addAttribute("usuarios", result.objects);
+
+        Result resultRol = rol.GetAll();
+        model.addAttribute("roles", resultRol.objects);
+
+        return "Usuario";
+    }
     
     @Autowired
     private UsuarioDAOImplementacion dao;
@@ -185,8 +199,6 @@ class UsuarioController {
     
     @GetMapping("/EditarUsuario")
     public String EditarUsuario(Model model){
-        
- 
         return "EditarUsuario";
     }
     
@@ -208,12 +220,10 @@ class UsuarioController {
         return dao.UpdateDireccion(direccion);
     }
     
-    @GetMapping("/Delete/{idUsuario}")
-    public String Delete(@PathVariable int idUsuario) {
-
-        dao.Delete(idUsuario);
-
-        return "redirect:/Usuario";
+    @PostMapping("/Delete/{idUsuario}")
+    @ResponseBody
+    public Result Delete(@PathVariable int idUsuario){
+        return dao.Delete(idUsuario);
     }
     
     @GetMapping("/Direccion/GetById")
