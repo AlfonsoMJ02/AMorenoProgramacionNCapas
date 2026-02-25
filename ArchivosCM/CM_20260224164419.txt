@@ -1,0 +1,234 @@
+create or replace PROCEDURE DireccionUpdateSP(
+    pIdDireccion IN NUMBER,
+    pCalle IN VARCHAR,
+    pNumeroInterior IN VARCHAR,
+    pNumeroExterior IN VARCHAR,
+    pIdColonia IN NUMBER
+)
+AS
+BEGIN
+    UPDATE Direccion SET Calle = pCalle, NumeroInterior = pNumeroInterior, NumeroExterior = pNumeroExterior, IdColonia = pIdColonia WHERE IdDireccion = pIdDireccion;
+
+    COMMIT;
+END DireccionUpdateSP;
+
+
+
+
+
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE DireccionGetByIdSP(
+    pCursor OUT SYS_REFCURSOR,
+    pValor IN NUMBER
+)
+AS
+BEGIN
+    OPEN pCursor FOR 
+    SELECT IdDireccion, Calle, NumeroInterior, NumeroExterior, Colonia.Nombre AS NombreColonia, Colonia.CodigoPostal AS CP, 
+    Municipio.Nombre AS NombreMunicipio, Estado.Nombre AS NombreEstado, Pais.Nombre AS NombrePais FROM Direccion 
+    INNER JOIN Colonia ON Direccion.IdColonia = Colonia.IdColonia INNER JOIN Municipio ON Colonia.IdMunicipio = Municipio.IdMunicipio
+    INNER JOIN Estado ON Municipio.IdEstado = Estado.IdEstado INNER JOIN Pais ON Estado.IdPais = Pais.IdPais WHERE IdDireccion = 12;
+END DireccionGetByIdSP;
+
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE DireccionDeleteSP(
+    pIdDireccion IN NUMBER
+)
+AS
+BEGIN
+    DELETE FROM Direccion WHERE IdDireccion = pIdDireccion;
+END DireccionDeleteSP;
+
+
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE DireccionAddSP(
+    pCalle IN VARCHAR,
+    pNumeroInterior IN VARCHAR,
+    pNumeroExterior IN VARCHAR,
+    pIdColonia IN NUMBER,
+    pIdUsuario IN NUMBER
+)
+AS
+BEGIN
+    INSERT INTO Direccion (Calle, NumeroInterior, NumeroExterior, IdColonia, IdUsuario) 
+    VALUES (pCalle, pNumeroInterior, pNumeroExterior, pIdColonia, pIdUsuario);
+    COMMIT;
+END DireccionAddSP;
+
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE UsuarioDireccionGetAllSP(
+    pCursor OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+    OPEN pCursor FOR
+            SELECT Usuario.IdUsuario, Usuario.Nombre AS NombreUsuario, Usuario.ApellidoPaterno, Usuario.ApellidoMaterno, Usuario.Email, 
+            Usuario.FechaNacimiento, Usuario.Password, Usuario.Sexo, Usuario.Telefono, Usuario.Celular, Usuario.Curp, Usuario.UserName, 
+            Rol.IdRol AS IdRol, Rol.Nombre AS NombreRol, Direccion.IdDireccion, Direccion.Calle, Direccion.NumeroInterior, Direccion.NumeroExterior, Direccion.IdColonia,
+            Colonia.Nombre AS NombreColonia, Colonia.CodigoPostal, Colonia.IdMunicipio, Municipio.Nombre AS NombreMunicipio, Municipio.IdEstado,
+            Estado.Nombre AS NombreEstado, Estado.IdPais, Pais.Nombre AS NombrePais FROM Usuario LEFT JOIN Rol ON Usuario.IdRol = Rol.IdRol 
+            LEFT JOIN Direccion ON Usuario.IdUsuario = Direccion.IdUsuario LEFT JOIN Colonia ON Direccion.IdColonia = Colonia.IdColonia
+            LEFT JOIN Municipio ON Colonia.IdMunicipio = Municipio.IdMunicipio LEFT JOIN Estado ON Municipio.IdEstado = Estado.IdEstado
+            LEFT JOIN Pais ON Estado.IdPais = Pais.IdPais ORDER BY IdUsuario;
+END UsuarioDireccionGetAllSP;
+
+
+
+
+
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE UsuarioDireccionAddSP (
+    pNombre            IN VARCHAR,
+    pApellidoPaterno   IN VARCHAR,
+    pApellidoMaterno   IN VARCHAR,
+    pEmail             IN VARCHAR,
+    pFechaNacimiento   IN DATE,
+    pPassword          IN VARCHAR,
+    pSexo              IN CHAR,
+    pTelefono          IN VARCHAR,
+    pCelular           IN VARCHAR,
+    pCurp              IN VARCHAR,
+    pUserName          IN VARCHAR,
+    pIdRol             IN NUMBER,
+
+    pCalle             IN VARCHAR,
+    pNumeroInterior    IN VARCHAR,
+    pNumeroExterior    IN VARCHAR,
+    pIdColonia         IN NUMBER
+    
+)
+AS
+    vIdUsuario NUMBER;
+BEGIN
+
+    INSERT INTO Usuario (
+        Nombre, ApellidoPaterno, ApellidoMaterno, Email,
+        FechaNacimiento, Password, Sexo, Telefono,
+        Celular, Curp, UserName, IdRol
+    )
+    VALUES (
+        pNombre, pApellidoPaterno, pApellidoMaterno, pEmail,
+        pFechaNacimiento, pPassword, pSexo, pTelefono,
+        pCelular, pCurp, pUserName, pIdRol
+    )
+    RETURNING IdUsuario INTO vIdUsuario;
+
+    INSERT INTO Direccion (
+        Calle, NumeroInterior, NumeroExterior, IdColonia, IdUsuario
+    )
+    VALUES (
+        pCalle, pNumeroInterior, pNumeroExterior, pIdColonia, vIdUsuario
+    );
+    COMMIT;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+END UsuarioDireccionAddSP;
+
+
+
+
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE EstadoGetAllByIdSP(
+    pCursor OUT SYS_REFCURSOR,
+    pIdPais IN NUMBER
+)
+AS
+BEGIN
+    OPEN pCursor FOR
+    SELECT IdEstado, Nombre FROM Estado WHERE IdPais = pIdPais ORDER BY Nombre ASC;
+END EstadoGetAllByIdSP;
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE ColoniaGetAllByIdSP(
+    pCursor OUT SYS_REFCURSOR,
+    pIdMunicipio IN NUMBER
+)
+AS
+BEGIN
+    OPEN pCursor FOR
+    SELECT IdColonia, Nombre FROM Colonia WHERE IdMunicipio = pIdMunicipio ORDER BY Nombre ASC;
+END ColoniaGetAllByIdSP;
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE DireccionGetByIdSP(
+    pCursor OUT SYS_REFCURSOR,
+    pValor IN NUMBER
+)
+AS
+BEGIN
+    OPEN pCursor FOR 
+    SELECT IdDireccion, Calle, NumeroInterior, NumeroExterior, Colonia.Nombre AS NombreColonia, Colonia.CodigoPostal AS CP, 
+    Municipio.Nombre AS NombreMunicipio, Estado.Nombre AS NombreEstado, Pais.Nombre AS NombrePais FROM Direccion 
+    INNER JOIN Colonia ON Direccion.IdColonia = Colonia.IdColonia INNER JOIN Municipio ON Colonia.IdMunicipio = Municipio.IdMunicipio
+    INNER JOIN Estado ON Municipio.IdEstado = Estado.IdEstado INNER JOIN Pais ON Estado.IdPais = Pais.IdPais WHERE IdDireccion = 12;
+END DireccionGetByIdSP;
+
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE PaisGetAllSP(
+    pCursor OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+    OPEN pCursor FOR 
+        SELECT IdPais, Nombre FROM PAIS ORDER BY Nombre ASC;
+END PaisGetAllSP;
+
+
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE MunicipioGetAllByIdSP(
+    pCursor OUT SYS_REFCURSOR,
+    pIdEstado IN NUMBER
+)
+AS
+BEGIN
+    OPEN pCursor FOR
+    SELECT IdMunicipio, Nombre FROM Municipio WHERE IdEstado = pIdEstado ORDER BY Nombre ASC;
+END MunicipioGetAllByIdSP;
+
+
+
+
+create or replace NONEDITIONABLE PROCEDURE DireccionGetByIdSP(
+    pCursor OUT SYS_REFCURSOR,
+    pValor IN NUMBER
+)
+AS
+BEGIN
+    OPEN pCursor FOR 
+    SELECT IdDireccion, Calle, NumeroInterior, NumeroExterior, Colonia.Nombre AS NombreColonia, Colonia.CodigoPostal AS CP, 
+    Municipio.Nombre AS NombreMunicipio, Estado.Nombre AS NombreEstado, Pais.Nombre AS NombrePais FROM Direccion 
+    INNER JOIN Colonia ON Direccion.IdColonia = Colonia.IdColonia INNER JOIN Municipio ON Colonia.IdMunicipio = Municipio.IdMunicipio
+    INNER JOIN Estado ON Municipio.IdEstado = Estado.IdEstado INNER JOIN Pais ON Estado.IdPais = Pais.IdPais WHERE IdDireccion = 12;
+END DireccionGetByIdSP;
+
+

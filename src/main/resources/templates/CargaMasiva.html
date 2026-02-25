@@ -1,0 +1,139 @@
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Carga Masiva</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+
+    <body class="d-flex justify-content-center">
+
+        <div class="text-center">
+            <br>
+
+            <button id="btnMostrar" class="btn btn-primary mb-3" onclick="mostrarOpciones()">Mostrar formulario</button>
+
+            <div id="opciones" class="d-none mb-3">
+                <button class="btn btn-secondary me-2" onclick="mostrarTxt()">Cargar archivo TXT</button>
+
+                <button class="btn btn-success" onclick="mostrarExcel()">Cargar archivo Excel</button>
+            </div>
+
+            <div id="formularioArchivo" class="mt-3">
+                <form id="formCarga" action="/Usuario/CargaMasiva" method="post" enctype="multipart/form-data">
+
+                    <input type="file" id="fileInput" name="archivo" class="form-control form-control-md mx-auto d-none">
+
+                    <br>
+
+                    <button type="submit" id="btnSubir" class="btn btn-primary d-none">Subir Archivo</button>
+
+                </form>
+            </div>
+
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+
+                    let tipoSeleccionado = "";
+
+                    function mostrarOpciones() {
+                        document.getElementById("btnMostrar").classList.add("d-none");
+                        document.getElementById("opciones").classList.remove("d-none");
+                    }
+
+                    function mostrarTxt() {
+                        tipoSeleccionado = "txt";
+
+                        var input = document.getElementById("fileInput");
+                        var boton = document.getElementById("btnSubir");
+
+                        input.accept = ".txt";
+                        input.value = "";
+                        input.classList.remove("d-none");
+                        boton.classList.remove("d-none");
+                    }
+
+                    function mostrarExcel() {
+                        tipoSeleccionado = "xlsx";
+
+                        var input = document.getElementById("fileInput");
+                        var boton = document.getElementById("btnSubir");
+
+                        input.accept = ".xlsx";
+                        input.value = "";
+                        input.classList.remove("d-none");
+                        boton.classList.remove("d-none");
+                    }
+
+                    document.getElementById("formCarga").addEventListener("submit", function (e) {
+
+                        e.preventDefault();
+
+                        var input = document.getElementById("fileInput");
+
+                        if (!input.files.length) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Debes seleccionar un archivo'
+                            });
+                            return;
+                        }
+
+                        var nombreArchivo = input.files[0].name;
+                        var extension = nombreArchivo.split('.').pop().toLowerCase();
+
+                        if (extension !== "txt" && extension !== "xlsx") {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Archivo no válido',
+                                text: 'Solo se permiten archivos TXT o XLSX'
+                            });
+                            input.value = "";
+                            return;
+                        }
+
+                        fetch('/Usuario/CargaMasiva', {
+                            method: 'POST',
+                            body: new FormData(this)
+                        })
+                                .then(response => response.json())
+                                .then(data => {
+
+                                    if (data.success) {
+                                        Swal.fire({
+                                            title: '¡Éxito!',
+                                            text: data.message,
+                                            icon: 'success',
+                                            confirmButtonText: 'Aceptar'
+                                        });
+
+                                        document.getElementById("formCarga").reset();
+                                        document.getElementById("fileInput").classList.add("d-none");
+                                        document.getElementById("btnSubir").classList.add("d-none");
+
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Error',
+                                            text: data.message,
+                                            icon: 'error',
+                                            confirmButtonText: 'Aceptar'
+                                        });
+                                    }
+
+                                })
+                                .catch(error => {
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'Hubo un problema en el servidor',
+                                        icon: 'error',
+                                        confirmButtonText: 'Aceptar'
+                                    });
+                                });
+
+                    });
+        </script>
+    </body>
+</html>
