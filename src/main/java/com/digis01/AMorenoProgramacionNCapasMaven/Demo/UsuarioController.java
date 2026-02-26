@@ -8,26 +8,35 @@ import com.digis01.AMorenoProgramacionNCapasMaven.DAO.RolDAOImplementacion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Result;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Usuario;
 import com.digis01.AMorenoProgramacionNCapasMaven.DAO.UsuarioDAOImplementacion;
+import com.digis01.AMorenoProgramacionNCapasMaven.ML.Colonia;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Direccion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.ErroresArchivo;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Pais;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Rol;
+import com.digis01.AMorenoProgramacionNCapasMaven.Services.ValidationService;
 import jakarta.validation.Valid;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -282,88 +291,200 @@ class UsuarioController {
         return "CargaMasiva";
     }
     
-//    @PostMapping("/CargaMasiva")
-//    public String CargaMasiva(@RequestParam("archivo") MultipartFile archivo) {
-//        
-//        try {
-//            if (archivo != null) {
-//
-//                String rutaBase = System.getProperty("user.dir");
-//                String rutaCarpeta = "src/main/resources/archivosCM";
-//                String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS"));
-//                String nombreArchivo = fecha + archivo.getOriginalFilename();
-//                String rutaArchivo = rutaBase + "/" + rutaCarpeta + "/" + nombreArchivo;
-//                String extension = archivo.getOriginalFilename().split("\\.")[1];
-//                List<Usuario> alumnos = null;
-//                if (extension.equals("txt")) {
-//                    archivo.transferTo(new File(rutaArchivo));
-//                    alumnos = LecturaArchivoTxt(new File(rutaArchivo));
-//                } else if (extension.equals("xlsx")) {
-//
-//                } else {
-//                    System.out.println("Extensión erronea, manda archivos del formato solicitado");
-//                }
-//
-//                //List<ErroresArchivo> errores = ValidarDatos(alumnos);
-//
-//                if (errores.isEmpty()) {
-////                    se guarda info
-//                } else {
-////                    retorno lista errores, y la renderizo.
-//                }
-//                /*
-//                    - insertarlos
-//                    - renderizar la lista de errores
-//                 */
-//            }
-//        } catch (Exception ex) {
-//            // notificación de error
-//
-//            System.out.println(ex.getLocalizedMessage());
-//        }
-//        return "CargaMasiva";
-//    }
-//    
-//    public List<Usuario> LecturaArchivoTxt(File archivo) {
-//        List<Usuario> usuarios;
-//        //try with reouces - Garbage collector
-//        try(InputStream inputStream = new FileInputStream(archivo);
-//                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))){
-//            
-//            usuarios = new ArrayList<>();
-//            String cadena = "";
-//            while ( (cadena = bufferedReader.readLine()) != null) {                
-////                Nombre|ApellidoPaterno|Materno|Fecha
-//                String[] datosAlumno = cadena.split("\\|");
-//                Usuario usuario = new Usuario();
-//                usuario.setNombre(datosAlumno[0]);
-//                usuario.setApellidoPaterno(datosAlumno[1]);
-//                
-//                usuarios.add(usuario);
-//            }
-//            
-//        }catch(Exception ex){
-//            return null;
-//        }
-//        
-//        return usuarios;
-//    }
-//    
-//    public List<ErroresArchivo> ValidarDatos(List<Usuario> usuario){
-//        List<ErroresArchivo> errores = new ArrayList<>();
-//        
-//        for (Usuario usuario : usuarios) {
-//            BindingResult bindingResult = validationService.ValidateObject(usuario);
-//            
-//            if (bindingResult.hasErrors()) {
-//                for (ObjectError objectError : bindingResult.getAllErrors()) {
-//                    ErroresArchivo erroresArchivo = new ErroresArchivo();
-////                    erroresArchivo.dato = objectError.getObjectName();
-//                }
-//            }        
-//        }
-//        return errores;
-//    }
+    @PostMapping("/CargaMasiva")
+    public String CargaMasiva(@RequestParam("archivo") MultipartFile archivo, Model model) {
+        
+        try {
+            if (archivo != null) {
+
+                String rutaBase = System.getProperty("user.dir");
+                String rutaCarpeta = "src/main/resources/archivosCM";
+                String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS"));
+                String nombreArchivo = fecha + archivo.getOriginalFilename();
+                String rutaArchivo = rutaBase + "/" + rutaCarpeta + "/" + nombreArchivo;
+                String extension = archivo.getOriginalFilename().split("\\.")[1];
+                List<Usuario> usuarios = null;
+                if (extension.equals("txt")) {
+                    archivo.transferTo(new File(rutaArchivo));
+                    usuarios = LecturaArchivoTxt(new File(rutaArchivo));
+                } else if (extension.equals("xlsx")) {
+                    archivo.transferTo(new File(rutaArchivo));
+                    usuarios = LecturaArchivoXLSX(new File(rutaArchivo));
+                } else {
+                    model.addAttribute("mensajeError", "Extension erronea");
+                    return "CargaMasiva";
+                }
+
+                List<ErroresArchivo> errores = ValidarDatos(usuarios);
+
+                if (errores.isEmpty()) {
+                    model.addAttribute("archivoValido", true);
+    
+                } else {
+//                    retorno lista errores, y la renderizo.
+                    model.addAttribute("listaErrores", errores);
+                    model.addAttribute("archivoValido", false);
+                }
+                /*
+                    - insertarlos
+                    - renderizar la lista de errores
+                 */
+            }
+        } catch (Exception ex) {
+            // notificación de error
+
+            model.addAttribute("mensajeError", ex.getMessage());
+        }
+        return "CargaMasiva";
+    }
+    
+    public List<Usuario> LecturaArchivoTxt(File archivo) {
+        List<Usuario> usuarios = null;
+        //try with reouces - Garbage collector
+        try(InputStream inputStream = new FileInputStream(archivo);
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))){
+                   
+            usuarios = new ArrayList<>();
+            String cadena = "";
+            int fila = 1;
+            while ((cadena = bufferedReader.readLine()) != null) {                
+                String[] datosUsuario = cadena.split("\\|");
+                Usuario usuario = new Usuario();
+                usuario.setRol(new Rol());
+                usuario.setdireccion(new Direccion());
+                usuario.setColonia(new Colonia());
+                usuario.setNombre(datosUsuario[0]);
+                usuario.setApellidoPaterno(datosUsuario[1]);
+                usuario.setApellidoMaterno(datosUsuario[2]);
+                usuario.setEmail(datosUsuario[3]);
+                
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDate fecha = LocalDate.parse(datosUsuario[4], formatter);
+                usuario.setFechaNacimiento(fecha);
+                
+                usuario.setPassword(datosUsuario[5]);
+                usuario.setSexo(datosUsuario[6]);
+                usuario.setTelefono(datosUsuario[7]);
+                usuario.setCelular(datosUsuario[8]);
+                usuario.setCurp(datosUsuario[9]);
+                usuario.setUserName(datosUsuario[10]);
+                usuario.getRol().setIdRol(Integer.parseInt(datosUsuario[11]));
+                usuario.getdireccion().setCalle(datosUsuario[12]);
+                usuario.getdireccion().setNumeroInterior(datosUsuario[13]);
+                usuario.getdireccion().setNumeroExterior(datosUsuario[14]);
+                usuario.getColonia().setIdColonia(Integer.parseInt(datosUsuario[15]));
+                
+                usuarios.add(usuario);
+                fila++;
+            }         
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        
+        return usuarios;
+    }
+    
+    public List<Usuario> LecturaArchivoXLSX(File archivo) {
+
+        List<Usuario> usuarios = new ArrayList<>();
+
+        try (FileInputStream fis = new FileInputStream(archivo);
+             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            DataFormatter dataFormatter = new DataFormatter();
+
+            int fila = 1;
+
+            for (Row row : sheet) {          
+                Usuario usuario = new Usuario();
+                usuario.setRol(new Rol());
+                usuario.setdireccion(new Direccion());
+                usuario.setColonia(new Colonia());
+
+                usuario.setNombre(row.getCell(0).toString());
+                usuario.setApellidoPaterno(row.getCell(1).toString());
+                usuario.setApellidoMaterno(row.getCell(2).toString());
+                usuario.setEmail(row.getCell(3).toString());
+
+                Cell celdaFecha = row.getCell(4);
+                LocalDate fecha;
+
+                if (celdaFecha.getCellType() == CellType.NUMERIC) {
+                    fecha = celdaFecha.getLocalDateTimeCellValue().toLocalDate();
+
+                } else {
+                    String fechaTexto = celdaFecha.getStringCellValue();
+
+                    try {
+                        DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        fecha = LocalDate.parse(fechaTexto, formatter1);
+                    } catch (Exception ex1) {
+                        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("M/d/yy");
+                        fecha = LocalDate.parse(fechaTexto, formatter2);
+                    }
+                }
+
+                usuario.setFechaNacimiento(fecha);
+                usuario.setPassword(row.getCell(5).toString());
+                usuario.setSexo(row.getCell(6).toString());
+                usuario.setTelefono(dataFormatter.formatCellValue(row.getCell(7)));
+                usuario.setCelular(dataFormatter.formatCellValue(row.getCell(8)));
+                usuario.setCurp(row.getCell(9).toString());
+                usuario.setUserName(row.getCell(10).toString());
+
+                usuario.getRol().setIdRol(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(11))));
+
+                usuario.getdireccion().setCalle(dataFormatter.formatCellValue(row.getCell(12)));
+                usuario.getdireccion().setNumeroInterior(dataFormatter.formatCellValue(row.getCell(13)));
+                usuario.getdireccion().setNumeroExterior(dataFormatter.formatCellValue(row.getCell(14)));
+
+                usuario.getColonia().setIdColonia(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(15))));
+
+                usuarios.add(usuario);
+                fila++;
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return usuarios;
+    }
+    
+    @Autowired
+    private ValidationService validationService;
+    
+    public List<ErroresArchivo> ValidarDatos(List<Usuario> usuarios){
+
+    List<ErroresArchivo> errores = new ArrayList<>();
+
+    int fila = 1;
+
+    for (Usuario usuario : usuarios) {
+
+        BindingResult bindingResult = validationService.ValidateObject(usuario);
+
+        System.out.println("Errores en fila " + fila + ": " + bindingResult.getErrorCount());
+
+        if (bindingResult.hasErrors()) {
+
+            for (FieldError fieldError : bindingResult.getFieldErrors()) {
+
+                ErroresArchivo error = new ErroresArchivo();
+                error.fila = fila;
+                error.dato = fieldError.getField();
+                error.descripcion = fieldError.getDefaultMessage();
+
+                errores.add(error);
+            }
+        }
+
+        fila++;
+    }
+
+    return errores;
+}
     
     @Autowired
     private EstadoDAOImplementacion estado;

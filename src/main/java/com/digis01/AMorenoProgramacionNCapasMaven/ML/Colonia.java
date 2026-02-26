@@ -7,7 +7,7 @@ public class Colonia {
     private int IdColonia;
     private String Nombre;
     
-    @NotEmpty(message = "Este campo no puede estar vacio")
+    //@NotEmpty(message = "Este campo no puede estar vacio")
     private String CodigoPostal;
     
     public Colonia(){

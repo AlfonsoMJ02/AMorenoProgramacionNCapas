@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Carga Masiva</title>
@@ -8,132 +9,153 @@
 
     <body class="d-flex justify-content-center">
 
-        <div class="text-center">
-            <br>
+        <div class="text-center mt-4">
 
-            <button id="btnMostrar" class="btn btn-primary mb-3" onclick="mostrarOpciones()">Mostrar formulario</button>
+            <button id="btnMostrar"
+                    class="btn btn-primary mb-3"
+                    th:if="${archivoValido == null or !archivoValido}">
+                Mostrar formulario
+            </button>
 
             <div id="opciones" class="d-none mb-3">
-                <button class="btn btn-secondary me-2" onclick="mostrarTxt()">Cargar archivo TXT</button>
-
-                <button class="btn btn-success" onclick="mostrarExcel()">Cargar archivo Excel</button>
+                <button class="btn btn-secondary me-2" id="btnTxt">Cargar archivo TXT</button>
+                <button class="btn btn-success" id="btnExcel">Cargar archivo Excel</button>
             </div>
 
             <div id="formularioArchivo" class="mt-3">
                 <form id="formCarga" action="/Usuario/CargaMasiva" method="post" enctype="multipart/form-data">
 
-                    <input type="file" id="fileInput" name="archivo" class="form-control form-control-md mx-auto d-none">
+                    <input type="file" id="fileInput" name="archivo"
+                           class="form-control form-control-md mx-auto d-none"
+                           style="max-width: 400px;">
 
                     <br>
 
-                    <button type="submit" id="btnSubir" class="btn btn-primary d-none">Subir Archivo</button>
+                    <button type="submit" id="btnSubir"
+                            class="btn btn-primary d-none">
+                        Subir Archivo
+                    </button>
 
                 </form>
             </div>
 
+            <div id="resultadoValidacion">
+
+                <div th:if="${archivoValido}" class="mt-4">
+                    <button class="btn btn-success">
+                        Proceder con inserción
+                    </button>
+                </div>
+
+                <div th:if="${listaErrores != null}">
+                    <table class="table table-bordered table-danger mt-3">
+                        <thead>
+                            <tr>
+                                <th>Fila</th>
+                                <th>Campo</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="error : ${listaErrores}">
+                                <td th:text="${error.fila}"></td>
+                                <td th:text="${error.dato}"></td>
+                                <td th:text="${error.descripcion}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
         </div>
 
+
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
         <script>
 
-                    let tipoSeleccionado = "";
+            $(document).ready(function () {
 
-                    function mostrarOpciones() {
-                        document.getElementById("btnMostrar").classList.add("d-none");
-                        document.getElementById("opciones").classList.remove("d-none");
-                    }
+                $("#btnMostrar").click(function () {
 
-                    function mostrarTxt() {
-                        tipoSeleccionado = "txt";
+                    $("#btnMostrar").addClass("d-none");
+                    $("#opciones").removeClass("d-none");
 
-                        var input = document.getElementById("fileInput");
-                        var boton = document.getElementById("btnSubir");
+                    // Ocultar resultados anteriores
+                    $("#resultadoValidacion").hide();
+                });
 
-                        input.accept = ".txt";
-                        input.value = "";
-                        input.classList.remove("d-none");
-                        boton.classList.remove("d-none");
-                    }
+                $("#btnTxt").click(function () {
 
-                    function mostrarExcel() {
-                        tipoSeleccionado = "xlsx";
+                    $("#fileInput").attr("accept", ".txt").val("").removeClass("d-none");
+                    $("#btnSubir").removeClass("d-none");
+                });
 
-                        var input = document.getElementById("fileInput");
-                        var boton = document.getElementById("btnSubir");
+                $("#btnExcel").click(function () {
 
-                        input.accept = ".xlsx";
-                        input.value = "";
-                        input.classList.remove("d-none");
-                        boton.classList.remove("d-none");
-                    }
+                    $("#fileInput").attr("accept", ".xlsx").val("").removeClass("d-none");
+                    $("#btnSubir").removeClass("d-none");
+                });
 
-                    document.getElementById("formCarga").addEventListener("submit", function (e) {
+                $("#formCarga").submit(function (e) {
 
+                    let input = $("#fileInput")[0];
+
+                    if (!input.files.length) {
                         e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Debes seleccionar un archivo'
+                        });
+                        return;
+                    }
 
-                        var input = document.getElementById("fileInput");
+                    let nombreArchivo = input.files[0].name;
+                    let extension = nombreArchivo.split('.').pop().toLowerCase();
 
-                        if (!input.files.length) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Debes seleccionar un archivo'
-                            });
-                            return;
-                        }
+                    if (extension !== "txt" && extension !== "xlsx") {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Archivo no válido',
+                            text: 'Solo se permiten archivos TXT o XLSX'
+                        });
+                        $("#fileInput").val("");
+                    }
+                });
 
-                        var nombreArchivo = input.files[0].name;
-                        var extension = nombreArchivo.split('.').pop().toLowerCase();
+            });
 
-                        if (extension !== "txt" && extension !== "xlsx") {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Archivo no válido',
-                                text: 'Solo se permiten archivos TXT o XLSX'
-                            });
-                            input.value = "";
-                            return;
-                        }
-
-                        fetch('/Usuario/CargaMasiva', {
-                            method: 'POST',
-                            body: new FormData(this)
-                        })
-                                .then(response => response.json())
-                                .then(data => {
-
-                                    if (data.success) {
-                                        Swal.fire({
-                                            title: '¡Éxito!',
-                                            text: data.message,
-                                            icon: 'success',
-                                            confirmButtonText: 'Aceptar'
-                                        });
-
-                                        document.getElementById("formCarga").reset();
-                                        document.getElementById("fileInput").classList.add("d-none");
-                                        document.getElementById("btnSubir").classList.add("d-none");
-
-                                    } else {
-                                        Swal.fire({
-                                            title: 'Error',
-                                            text: data.message,
-                                            icon: 'error',
-                                            confirmButtonText: 'Aceptar'
-                                        });
-                                    }
-
-                                })
-                                .catch(error => {
-                                    Swal.fire({
-                                        title: 'Error!',
-                                        text: 'Hubo un problema en el servidor',
-                                        icon: 'error',
-                                        confirmButtonText: 'Aceptar'
-                                    });
-                                });
-
-                    });
         </script>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+
+            let archivoValido = /*[[${archivoValido}]]*/ false;
+            let listaErrores = /*[[${listaErrores}]]*/ null;
+
+            if (archivoValido === true) {
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Archivo válido',
+                    text: 'El archivo fue validado correctamente.'
+                });
+
+            } else if (listaErrores !== null && listaErrores.length > 0) {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Errores encontrados',
+                    text: 'El archivo contiene errores. Revisa la tabla.'
+                });
+            }
+
+            /*]]>*/
+        </script>
+
     </body>
 </html>
