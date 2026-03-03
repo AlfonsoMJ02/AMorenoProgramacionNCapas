@@ -3,11 +3,13 @@ package com.digis01.AMorenoProgramacionNCapasMaven.DAO;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.*;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.text.StyleConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class UsuarioDAOImplementacion implements IUsuario{
@@ -94,6 +96,7 @@ public class UsuarioDAOImplementacion implements IUsuario{
                                 usuario.setCurp(resultSet.getString("Curp"));
                                 usuario.setUserName(resultSet.getString("UserName"));
                                 usuario.setImagen(resultSet.getString("Imagen"));
+                                usuario.setEstatus(resultSet.getInt("Estatus"));
                                 
                                 usuario.setRol(new Rol());
                                 usuario.getRol().setIdRol(resultSet.getInt("IdRol"));
@@ -467,6 +470,30 @@ public class UsuarioDAOImplementacion implements IUsuario{
         
     }
     
+    @Override
+    public Result UpdateEstatus(int idUsuario, int estatus){
+        Result result = new Result();
+        
+        try {
+            jdbcTemplate.execute("{CALL EstatusUpdateSP(?,?)}",
+                    (CallableStatementCallback<Boolean>) callableStatement ->{
+                        callableStatement.setInt(1,idUsuario);
+                        callableStatement.setInt(2,estatus);
+                        
+                        callableStatement.execute();
+                        result.correct = true;
+                        return true;
+                    });
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
+        
+        return result;
+    }
+    
+    @Override            
     public Result UpdateImagen(int idUsuario, String imagenBase64) {
 
         Result result = new Result();
@@ -551,5 +578,49 @@ public class UsuarioDAOImplementacion implements IUsuario{
         return result;
     }
     
-    
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result AddAll(List<Usuario> usuarios) {
+
+        Result result = new Result();
+
+        try {
+
+            jdbcTemplate.batchUpdate("{CALL UsuarioDireccionAddSP(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
+                    usuarios,
+                    usuarios.size(),
+                    (callableStatement, usuario) -> {
+
+                        callableStatement.setString(1, usuario.getNombre());
+                        callableStatement.setString(2, usuario.getApellidoPaterno());
+                        callableStatement.setString(3, usuario.getApellidoMaterno());
+                        callableStatement.setString(4, usuario.getEmail());
+                        callableStatement.setDate(5,java.sql.Date.valueOf(usuario.getFechaNacimiento()));
+
+                        callableStatement.setString(6, usuario.getPassword());
+                        callableStatement.setString(7, usuario.getSexo());
+                        callableStatement.setString(8, usuario.getTelefono());
+                        callableStatement.setString(9, usuario.getCelular());
+                        callableStatement.setString(10, usuario.getCurp());
+                        callableStatement.setString(11, usuario.getUserName());
+
+                        callableStatement.setInt(12,usuario.getRol().getIdRol());
+                        callableStatement.setString(13,usuario.getImagen());
+                        callableStatement.setString(14,usuario.getdireccion().getCalle());
+                        callableStatement.setString(15,usuario.getdireccion().getNumeroInterior());
+                        callableStatement.setString(16,usuario.getdireccion().getNumeroExterior());
+                        callableStatement.setInt(17,usuario.getColonia().getIdColonia());
+                    });
+
+            result.correct = true;
+
+        } catch (Exception ex) {
+
+            result.correct = false;
+            result.errorMessage = ex.getMessage();
+            result.ex = ex;
+        }
+
+        return result;
+    }
 }

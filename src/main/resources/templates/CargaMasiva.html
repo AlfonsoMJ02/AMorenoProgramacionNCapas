@@ -42,9 +42,11 @@
             <div id="resultadoValidacion">
 
                 <div th:if="${archivoValido}" class="mt-4">
-                    <button class="btn btn-success">
-                        Proceder con inserción
-                    </button>
+                    <form th:action="@{/Usuario/ProcesarCargaMasiva/{uuid}(uuid=${uuidCarga})}" method="post">
+                        <button type="submit" class="btn btn-success">
+                            Proceder con inserción
+                        </button>
+                    </form>
                 </div>
 
                 <div th:if="${listaErrores != null}">
@@ -52,7 +54,7 @@
                         <thead>
                             <tr>
                                 <th>Fila</th>
-                                <th>Campo</th>
+                                <th>Dato</th>
                                 <th>Descripción</th>
                             </tr>
                         </thead>

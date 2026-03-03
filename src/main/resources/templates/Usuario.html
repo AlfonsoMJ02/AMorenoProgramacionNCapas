@@ -451,18 +451,21 @@
                                     th:text="${rol.nombre}">
                             </option>
                         </select>
-
+                                                
                         <button type="button"
                                 class="btn btn-outline-primary btn-sm"
                                 id="btnBuscar">
                             <i class="bi bi-search"></i>
                         </button>
 
-                    </form>
+                    </form>                    
                     
-                    <!-- Boton agregar -->
                     <a href="Usuario/Form" class="btn btn-success">
                         <i class="bi bi-person-plus-fill"></i> Agregar
+                    </a>
+                    
+                    <a href="Usuario/CargaMasiva" class="btn btn-primary">
+                        <i class="bi bi-person-plus-fill">Agregar por carga masiva</i>
                     </a>
 
                 </div>
@@ -490,6 +493,12 @@
                                     <div class="row align-items-start">
 
                                         <div class="col-md-2 text-center position-relative">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input estatus-switch"
+                                                       type="checkbox"
+                                                       th:data-id="${usuario.IdUsuario}" 
+                                                       th:checked="${usuario.Estatus == 1}">
+                                            </div> 
                                             <img 
                                                 th:id="'previewImage-' + ${usuario.idUsuario}"
                                                     class="img-fluid rounded-circle border"
@@ -983,83 +992,83 @@
             
             function actualizarImagen(idUsuario, input) {
 
-    const file = input.files[0];
-    if (!file) return;
+            const file = input.files[0];
+            if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Formato no válido',
-            text: 'Solo se permiten imágenes'
-        });
-        input.value = "";
-        return;
-    }
+            if (!file.type.startsWith("image/")) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Formato no válido',
+                    text: 'Solo se permiten imágenes'
+                });
+                input.value = "";
+                return;
+            }
 
-    Swal.fire({
-        title: '¿Actualizar imagen?',
-        text: 'La imagen del usuario será reemplazada.',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#198754',
-        cancelButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, actualizar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
+            Swal.fire({
+                title: '¿Actualizar imagen?',
+                text: 'La imagen del usuario será reemplazada.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#dc3545',
+                confirmButtonText: 'Sí, actualizar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
 
-        if (result.isConfirmed) {
-            
-            const formData = new FormData();
-            formData.append("idUsuario", idUsuario);
-            formData.append("imagenFile", file);
+                if (result.isConfirmed) {
 
-            fetch('/Usuario/Imagen/Update', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
+                    const formData = new FormData();
+                    formData.append("idUsuario", idUsuario);
+                    formData.append("imagenFile", file);
 
-                if (data.correct) {
+                    fetch('/Usuario/Imagen/Update', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
 
-                    const reader = new FileReader();
+                        if (data.correct) {
 
-                    reader.onload = function(e) {
-                        document.getElementById("previewImage-" + idUsuario).src = e.target.result;
-                    };
+                            const reader = new FileReader();
 
-                    reader.readAsDataURL(file);
+                            reader.onload = function(e) {
+                                document.getElementById("previewImage-" + idUsuario).src = e.target.result;
+                            };
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Actualizada',
-                        text: 'La imagen fue actualizada correctamente',
-                        timer: 1500,
-                        showConfirmButton: false
+                            reader.readAsDataURL(file);
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Actualizada',
+                                text: 'La imagen fue actualizada correctamente',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.errorMessage
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error inesperado',
+                            text: 'Ocurrió un problema al actualizar'
+                        });
+                        console.error(error);
                     });
 
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.errorMessage
-                    });
+                    input.value = "";
                 }
-            })
-            .catch(error => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error inesperado',
-                    text: 'Ocurrió un problema al actualizar'
-                });
-                console.error(error);
             });
-
-        } else {
-            input.value = "";
         }
-    });
-}
 
 
 
@@ -1329,6 +1338,76 @@
         title: 'Error',
         text: 'Ocurrió un problema al agregar el usuario'
     });
+</script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    let mensajeCorrecto = /*[[${mensajeCorrecto}]]*/ null;
+    let mensajeError = /*[[${mensajeError}]]*/ null;
+
+    if (mensajeCorrecto !== null) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: mensajeCorrecto,
+            confirmButtonColor: '#3085d6'
+        });
+    }
+
+    if (mensajeError !== null) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: mensajeError,
+            confirmButtonColor: '#d33'
+        });
+    }
+
+    /*]]>*/
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".estatus-switch").forEach(function (switchElement) {
+
+        switchElement.addEventListener("change", function () {
+
+            var idUsuario = this.getAttribute("data-id");
+            var estatus = this.checked ? 1 : 0;
+            
+            fetch("/Usuario/Estatus/Update", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "idUsuario=" + idUsuario + "&estatus=" + estatus
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.correct) {
+                    Swal.fire({
+                       icon: 'success',
+                       title: 'Actualizado',
+                       text: 'El estatus se actualizo correctamente',
+                       timer: 1500,
+                       showConfirmButton: false
+                    });
+                } else {
+                    alert("Error: " + data.errorMessage);
+                }
+
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+
+        });
+
+    });
+
+});
 </script>
     </body>
 </html>

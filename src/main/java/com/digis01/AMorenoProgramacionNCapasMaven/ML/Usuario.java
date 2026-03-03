@@ -71,6 +71,16 @@ public class Usuario {
     
     public String Imagen;
     
+    private int Estatus;
+
+    public int getEstatus() {
+        return Estatus;
+    }
+
+    public void setEstatus(int Estatus) {
+        this.Estatus = Estatus;
+    }
+    
     @Valid
     private Rol Rol;
     

@@ -8,12 +8,14 @@ import com.digis01.AMorenoProgramacionNCapasMaven.DAO.RolDAOImplementacion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Result;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Usuario;
 import com.digis01.AMorenoProgramacionNCapasMaven.DAO.UsuarioDAOImplementacion;
+import com.digis01.AMorenoProgramacionNCapasMaven.DAO.UsuarioDAOJPAImplementacion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Colonia;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Direccion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.ErroresArchivo;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Pais;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Rol;
 import com.digis01.AMorenoProgramacionNCapasMaven.Services.ValidationService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -115,6 +118,23 @@ class UsuarioController {
         return "Formulario";
     }
     
+   @Autowired
+   private UsuarioDAOJPAImplementacion daoJPA;
+
+    @GetMapping()
+    public String GetAll(Model model) {
+
+        Result<Usuario> result = daoJPA.GetAll();
+
+        if (result.correct) {
+            model.addAttribute("usuarios", result.objects);
+        } else {
+            model.addAttribute("error", result.errorMessage);
+        }
+
+        return "Usuario";
+    }
+
     @PostMapping("Form")
     public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult, @RequestParam("imagenFile") MultipartFile imagenFile,RedirectAttributes redirectAttributes, Model model){
 
@@ -186,29 +206,29 @@ class UsuarioController {
     @Autowired
     private UsuarioDAOImplementacion dao;
 
-    @GetMapping()
-    public String GetAll(Model model) {
-
-        Result<Usuario> result = dao.GetAll();
-        Result resultRol = rol.GetAll();
-        Result resultPais = pais.GetAll(); 
-
-        if (result.correct) {
-            model.addAttribute("usuarios", result.objects);
-        } else {
-            model.addAttribute("usuarios", new ArrayList<Usuario>());
-        }
-
-        if (resultRol.correct) {
-            model.addAttribute("roles", resultRol.objects);
-        }
-
-        if (resultPais.correct) {
-            model.addAttribute("paises", resultPais.objects);
-        }
-
-        return "Usuario";
-    }
+//    @GetMapping()
+//    public String GetAll(Model model) {
+//
+//        Result<Usuario> result = dao.GetAll();
+//        Result resultRol = rol.GetAll();
+//        Result resultPais = pais.GetAll(); 
+//
+//        if (result.correct) {
+//            model.addAttribute("usuarios", result.objects);
+//        } else {
+//            model.addAttribute("usuarios", new ArrayList<Usuario>());
+//        }
+//
+//        if (resultRol.correct) {
+//            model.addAttribute("roles", resultRol.objects);
+//        }
+//
+//        if (resultPais.correct) {
+//            model.addAttribute("paises", resultPais.objects);
+//        }
+//
+//        return "Usuario";
+//    }
     
     @GetMapping("/getById")
     @ResponseBody
@@ -286,13 +306,32 @@ class UsuarioController {
         return result;     
     }
     
+    @PostMapping("/Estatus/Update")
+    @ResponseBody
+    public Result UpdateEstatus(@RequestParam("idUsuario") int idUsuario, @RequestParam("estatus") int estatus) {
+        
+        Result result = new Result();
+
+        try {
+
+            result = dao.UpdateEstatus(idUsuario, estatus);
+
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
+
+        return result;
+    }
+    
     @GetMapping("/CargaMasiva")
     public String cargaMasiva(){
         return "CargaMasiva";
     }
     
     @PostMapping("/CargaMasiva")
-    public String CargaMasiva(@RequestParam("archivo") MultipartFile archivo, Model model) {
+    public String CargaMasiva(@RequestParam("archivo") MultipartFile archivo, Model model, HttpSession session) {
         
         try {
             if (archivo != null) {
@@ -318,8 +357,11 @@ class UsuarioController {
                 List<ErroresArchivo> errores = ValidarDatos(usuarios);
 
                 if (errores.isEmpty()) {
+                    String uuid = UUID.randomUUID().toString();
+                    session.setAttribute(uuid, usuarios);
+
                     model.addAttribute("archivoValido", true);
-    
+                    model.addAttribute("uuidCarga", uuid);
                 } else {
 //                    retorno lista errores, y la renderizo.
                     model.addAttribute("listaErrores", errores);
@@ -336,6 +378,35 @@ class UsuarioController {
             model.addAttribute("mensajeError", ex.getMessage());
         }
         return "CargaMasiva";
+    }
+    
+    @PostMapping("/ProcesarCargaMasiva/{uuid}")
+    public String ProcesarCargaMasiva(@PathVariable String uuid, RedirectAttributes redirectAttributes, HttpSession session){
+           
+        try {
+            List<Usuario> usuarios = (List<Usuario>) session.getAttribute(uuid);
+            
+            if (usuarios == null) {
+                redirectAttributes.addFlashAttribute("mensajeError", "No se encontro informaacion para procesar");
+                
+                return "redirect:/Usuario/CargaMasiva";
+            }
+            Result result = dao.AddAll(usuarios);
+            if (result.correct) {
+                session.removeAttribute(uuid);
+                redirectAttributes.addFlashAttribute("mensajeCorrecto", "Carga Masiva procesada correctamente");
+                
+                return "redirect:/Usuario";
+            }else {
+                redirectAttributes.addFlashAttribute("mensajeError", result.errorMessage);
+                
+                return "redirect:/Usuario/CargaMasiva";
+            }
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("mensajeError",ex.getMessage());
+
+            return "redirect:/Usuario/CargaMasiva";
+        }      
     }
     
     public List<Usuario> LecturaArchivoTxt(File archivo) {
@@ -457,34 +528,34 @@ class UsuarioController {
     
     public List<ErroresArchivo> ValidarDatos(List<Usuario> usuarios){
 
-    List<ErroresArchivo> errores = new ArrayList<>();
+        List<ErroresArchivo> errores = new ArrayList<>();
 
-    int fila = 1;
+        int fila = 1;
 
-    for (Usuario usuario : usuarios) {
+        for (Usuario usuario : usuarios) {
 
-        BindingResult bindingResult = validationService.ValidateObject(usuario);
+            BindingResult bindingResult = validationService.ValidateObject(usuario);
 
-        System.out.println("Errores en fila " + fila + ": " + bindingResult.getErrorCount());
+            System.out.println("Errores en fila " + fila + ": " + bindingResult.getErrorCount());
 
-        if (bindingResult.hasErrors()) {
+            if (bindingResult.hasErrors()) {
 
-            for (FieldError fieldError : bindingResult.getFieldErrors()) {
+                for (FieldError fieldError : bindingResult.getFieldErrors()) {
 
-                ErroresArchivo error = new ErroresArchivo();
-                error.fila = fila;
-                error.dato = fieldError.getField();
-                error.descripcion = fieldError.getDefaultMessage();
+                    ErroresArchivo error = new ErroresArchivo();
+                    error.fila = fila;
+                    error.dato = fieldError.getField();
+                    error.descripcion = fieldError.getDefaultMessage();
 
-                errores.add(error);
+                    errores.add(error);
+                }
             }
+
+            fila++;
         }
 
-        fila++;
+        return errores;
     }
-
-    return errores;
-}
     
     @Autowired
     private EstadoDAOImplementacion estado;

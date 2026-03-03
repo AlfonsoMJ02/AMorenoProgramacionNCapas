@@ -3,6 +3,7 @@ package com.digis01.AMorenoProgramacionNCapasMaven.DAO;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Direccion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Result;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Usuario;
+import java.util.List;
 
 public interface IUsuario {
     Result GetAll();
@@ -14,4 +15,6 @@ public interface IUsuario {
     Result AddDireccion(Direccion direccion);
     Result UpdateImagen(int idUsuario, String imagenBase64);
     Result Search(String nombre, String apellidoPaterno, String apellidoMaterno, Integer idRol);
+    Result AddAll(List<Usuario> usuarios);
+    Result UpdateEstatus(int idUsuario, int estatus);
 }
