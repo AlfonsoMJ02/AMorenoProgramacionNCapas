@@ -153,4 +153,97 @@ public class UsuarioDAOJPAImplementacion implements IUsuarioJPA {
 
         return result;
     }
+
+    @Override
+    @Transactional
+    public Result AddDireccion(com.digis01.AMorenoProgramacionNCapasMaven.ML.Direccion direccionML) {
+
+        Result result = new Result();
+
+        try {
+
+            com.digis01.AMorenoProgramacionNCapasMaven.JPA.Usuario usuario
+                    = entityManager.find(
+                            com.digis01.AMorenoProgramacionNCapasMaven.JPA.Usuario.class,
+                            direccionML.getUsuario().getIdUsuario()
+                    );
+
+            com.digis01.AMorenoProgramacionNCapasMaven.JPA.Colonia colonia
+                    = entityManager.find(
+                            com.digis01.AMorenoProgramacionNCapasMaven.JPA.Colonia.class,
+                            direccionML.getColonia().getIdColonia()
+                    );
+
+            if (usuario != null && colonia != null) {
+
+                com.digis01.AMorenoProgramacionNCapasMaven.JPA.Direccion direccion
+                        = new com.digis01.AMorenoProgramacionNCapasMaven.JPA.Direccion();
+
+                direccion.setCalle(direccionML.getCalle());
+                direccion.setNumeroInterior(direccionML.getNumeroInterior());
+                direccion.setNumeroExterior(direccionML.getNumeroExterior());
+
+                direccion.setColonia(colonia);
+                direccion.setUsuario(usuario);
+
+                usuario.getDirecciones().add(direccion);
+
+                entityManager.persist(direccion);
+
+                result.correct = true;
+
+            } else {
+                result.correct = false;
+                result.errorMessage = "Usuario o Colonia no encontrados";
+            }
+
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getMessage();
+            result.ex = ex;
+        }
+
+        return result;
+    }
+
+    @Override
+    public Result GetByIdDireccion(int idDireccion) {
+
+        Result result = new Result();
+
+        try {
+
+            Direccion direccionJPA
+                    = entityManager.find(Direccion.class, idDireccion);
+
+            if (direccionJPA != null) {
+
+                com.digis01.AMorenoProgramacionNCapasMaven.ML.Direccion direccionML
+                        = modelMapper.map(
+                                direccionJPA,
+                                com.digis01.AMorenoProgramacionNCapasMaven.ML.Direccion.class
+                        );
+
+                direccionML.setUsuario(null); 
+
+                result.object = direccionML;
+                result.correct = true;
+
+            } else {
+
+                result.correct = false;
+                result.errorMessage = "Direccion no encontrada";
+
+            }
+
+        } catch (Exception ex) {
+
+            result.correct = false;
+            result.errorMessage = ex.getMessage();
+            result.ex = ex;
+
+        }
+
+        return result;
+    }
 }

@@ -317,10 +317,15 @@ class UsuarioController {
         return dao.Update(usuario);
     }
 
+//    @PostMapping("/Direccion/Add")
+//    @ResponseBody
+//    public Result AddDireccion(@RequestBody Direccion direccion) {
+//        return dao.AddDireccion(direccion);
+//    }
     @PostMapping("/Direccion/Add")
     @ResponseBody
     public Result AddDireccion(@RequestBody Direccion direccion) {
-        return dao.AddDireccion(direccion);
+        return daoJPA.AddDireccion(direccion);
     }
 
     @PostMapping("/Update/Direccion")
@@ -328,6 +333,8 @@ class UsuarioController {
     public Result UpdateDireccion(@RequestBody Direccion direccion) {
         return dao.UpdateDireccion(direccion);
     }
+    
+    
 
 //    @PostMapping("/Delete/{idUsuario}")
 //    @ResponseBody
@@ -341,10 +348,16 @@ class UsuarioController {
         return daoJPA.DeleteUser(idUsuario);
     }
 
-    @GetMapping("/Direccion/GetById")
+//    @GetMapping("/Direccion/GetById")
+//    @ResponseBody
+//    public Result GetByIdDireccion(@RequestParam int idDireccion) {
+//        return dao.GetByIdDireccion(idDireccion);
+//    }
+    
+    @GetMapping("/Direccion/GetById/{idDireccion}")
     @ResponseBody
-    public Result GetByIdDireccion(@RequestParam int idDireccion) {
-        return dao.GetByIdDireccion(idDireccion);
+    public Result GetByIdDireccion(@PathVariable int idDireccion) {
+        return daoJPA.GetByIdDireccion(idDireccion);
     }
 
 //    @GetMapping("/Direccion/Delete/{idDireccion}")

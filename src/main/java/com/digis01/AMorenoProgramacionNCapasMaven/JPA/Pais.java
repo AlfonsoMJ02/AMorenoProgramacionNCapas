@@ -1,10 +1,12 @@
 package com.digis01.AMorenoProgramacionNCapasMaven.JPA;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Pais {
     
     @Id

@@ -622,9 +622,11 @@
                                                 <div class="col-md-4 text-end">
 
                                                     <a class="btn btn-outline-warning btn-sm btnEditarDireccion"
-                                                        th:attr="data-id=${direccion.idDireccion}">
+                                                        th:attr="data-id=${direccion.idDireccion}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#EditarDireccion">
                                                         ✏
-                                                    </a>
+                                                     </a>
 
                                                     <a class="btn btn-sm btn-outline-danger"
                                                        data-bs-toggle="modal"
@@ -819,38 +821,37 @@
 
                 var button = event.relatedTarget;
                 var idDireccion = button.getAttribute('data-id');
+                
+                fetch('/Usuario/Direccion/GetById/' + idDireccion)
+                .then(response => response.json())
+                .then(data => {
 
-                fetch('/Usuario/Direccion/GetById?idDireccion=' + idDireccion)
-                    .then(response => response.json())
-                    .then(data => {
+                    console.log(data);
 
-                        console.log(data);
+                    if (data.correct) {
 
-                        if (data.correct) {
+                        var d = data.object;
 
-                            var d = data.object;
+                        document.getElementById("idDireccion").value = d.IdDireccion;
+                        document.getElementById("calle").value = d.Calle || "";
+                        document.getElementById("numeroInterior").value = d.NumeroInterior || "";
+                        document.getElementById("numeroExterior").value = d.NumeroExterior || "";
+                        document.getElementById("codigoPostal").value = d.Colonia?.CodigoPostal || "";
 
-                            document.getElementById("idDireccion").value = d.IdDireccion;
-                            document.getElementById("calle").value = d.Calle || "";
-                            document.getElementById("numeroInterior").value = d.NumeroInterior || "";
-                            document.getElementById("numeroExterior").value = d.NumeroExterior || "";
-                            document.getElementById("codigoPostal").value = d.Colonia?.CodigoPostal || "";
+                        document.getElementById("pais").value = d.Colonia?.Municipio?.Estado?.Pais?.IdPais;
+                        document.getElementById("estado").value = d.Colonia?.Municipio?.Estado?.IdEstado;
+                        document.getElementById("municipio").value = d.Colonia?.Municipio?.IdMunicipio;
+                        document.getElementById("colonia").value = d.Colonia?.IdColonia;
 
-                            // Selects
-                            document.getElementById("pais").value = d.Colonia?.Municipio?.Estado?.Pais?.IdPais;
-                            document.getElementById("estado").value = d.Colonia?.Municipio?.Estado?.IdEstado;
-                            document.getElementById("municipio").value = d.Colonia?.Municipio?.IdMunicipio;
-                            document.getElementById("colonia").value = d.Colonia?.IdColonia;
-
-                        } else {
-                            alert("No se pudo cargar la dirección");
-                        }
+                    } else {
+                        alert("No se pudo cargar la dirección");
+                    }
                     })
                     .catch(error => {
                         console.error("Error:", error);
                     });
 
-            });
+          });
             
             //Modal agregar direccion
             var modalAgregar = document.getElementById('AgregarDireccion');
@@ -1122,11 +1123,11 @@
 
 
             //Cargando los selects
-            $(document).on("click", ".btnEditarDireccion", function () {
+            /*$(document).on("click", ".btnEditarDireccion", function () {
 
             var idDireccion = $(this).data("id");
 
-            fetch('/Usuario/Direccion/GetById?idDireccion=' + idDireccion)
+            fetch('/Usuario/Direccion/GetById' + idDireccion)
                 .then(response => response.json())
                 .then(data => {
 
@@ -1318,7 +1319,7 @@
                     $("#colonia").empty().append('<option value="0" selected>Selecciona...</option>');
                 }
             });
-        });
+        });*/
         
         
         </script>

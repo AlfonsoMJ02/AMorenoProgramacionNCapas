@@ -1,6 +1,8 @@
 package com.digis01.AMorenoProgramacionNCapasMaven.JPA;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,6 +20,7 @@ import java.util.List;
 
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Usuario {
 
     @Id
@@ -70,6 +73,7 @@ public class Usuario {
     private Rol Rol;
 
     @OneToMany(mappedBy = "Usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Direccion> Direcciones;
     
      

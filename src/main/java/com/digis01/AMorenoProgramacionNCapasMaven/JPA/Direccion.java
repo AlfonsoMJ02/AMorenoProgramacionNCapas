@@ -1,5 +1,7 @@
 package com.digis01.AMorenoProgramacionNCapasMaven.JPA;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Direccion {
 
     @Id
@@ -31,6 +34,7 @@ public class Direccion {
 
     @ManyToOne
     @JoinColumn(name = "idusuario")
+    @JsonIgnore
     private Usuario Usuario;
 
 
