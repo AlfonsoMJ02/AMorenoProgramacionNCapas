@@ -817,41 +817,97 @@
             //Editar direccion Modal
             var modalEditarDireccion = document.getElementById('EditarDireccion');
 
-            modalEditarDireccion.addEventListener('show.bs.modal', function (event) {
+modalEditarDireccion.addEventListener('show.bs.modal', function (event) {
 
-                var button = event.relatedTarget;
-                var idDireccion = button.getAttribute('data-id');
-                
-                fetch('/Usuario/Direccion/GetById/' + idDireccion)
-                .then(response => response.json())
-                .then(data => {
+    var button = event.relatedTarget;
+    var idDireccion = button.getAttribute('data-id');
 
-                    console.log(data);
+    fetch('/Usuario/Direccion/GetById/' + idDireccion)
+        .then(response => response.json())
+        .then(data => {
 
-                    if (data.correct) {
+            console.log(data);
 
-                        var d = data.object;
+            if (data.correct) {
 
-                        document.getElementById("idDireccion").value = d.IdDireccion;
-                        document.getElementById("calle").value = d.Calle || "";
-                        document.getElementById("numeroInterior").value = d.NumeroInterior || "";
-                        document.getElementById("numeroExterior").value = d.NumeroExterior || "";
-                        document.getElementById("codigoPostal").value = d.Colonia?.CodigoPostal || "";
+                var d = data.object;
 
-                        document.getElementById("pais").value = d.Colonia?.Municipio?.Estado?.Pais?.IdPais;
-                        document.getElementById("estado").value = d.Colonia?.Municipio?.Estado?.IdEstado;
-                        document.getElementById("municipio").value = d.Colonia?.Municipio?.IdMunicipio;
-                        document.getElementById("colonia").value = d.Colonia?.IdColonia;
+                // Datos básicos
+                $("#idDireccion").val(d.IdDireccion);
+                $("#calle").val(d.Calle);
+                $("#numeroInterior").val(d.NumeroInterior);
+                $("#numeroExterior").val(d.NumeroExterior);
+                $("#codigoPostal").val(d.Colonia.CodigoPostal);
 
-                    } else {
-                        alert("No se pudo cargar la dirección");
+                var idPais = d.Colonia.Municipio.Estado.Pais.IdPais;
+                var idEstado = d.Colonia.Municipio.Estado.IdEstado;
+                var idMunicipio = d.Colonia.Municipio.IdMunicipio;
+                var idColonia = d.Colonia.IdColonia;
+
+                // Seleccionar país
+                $("#pais").val(idPais);
+
+                // Cargar estados
+                $.get('/Usuario/estado/getByPais/' + idPais, function (result) {
+
+                    if (result.correct) {
+
+                        $("#estado").empty();
+
+                        $.each(result.objects, function (i, estado) {
+                            $("#estado").append(
+                                '<option value="' + estado.IdEstado + '">' + estado.Nombre + '</option>'
+                            );
+                        });
+
+                        $("#estado").val(idEstado);
+
+                        // Cargar municipios
+                        $.get('/Usuario/municipio/getByEstado/' + idEstado, function (result2) {
+
+                            if (result2.correct) {
+
+                                $("#municipio").empty();
+
+                                $.each(result2.objects, function (i, municipio) {
+                                    $("#municipio").append(
+                                        '<option value="' + municipio.IdMunicipio + '">' + municipio.Nombre + '</option>'
+                                    );
+                                });
+
+                                $("#municipio").val(idMunicipio);
+
+                                // Cargar colonias
+                                $.get('/Usuario/colonia/getByMunicipio/' + idMunicipio, function (result3) {
+
+                                    if (result3.correct) {
+
+                                        $("#colonia").empty();
+
+                                        $.each(result3.objects, function (i, colonia) {
+                                            $("#colonia").append(
+                                                '<option value="' + colonia.IdColonia + '">' + colonia.Nombre + '</option>'
+                                            );
+                                        });
+
+                                        $("#colonia").val(idColonia);
+                                    }
+                                });
+                            }
+                        });
                     }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+                });
 
-          });
+            } else {
+                alert("No se pudo cargar la dirección");
+            }
+
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+
+});
             
             //Modal agregar direccion
             var modalAgregar = document.getElementById('AgregarDireccion');
@@ -1120,208 +1176,6 @@
                 var btnConfirmar = document.getElementById('btnEliminarDireccion');
                 btnConfirmar.href = '/Usuario/Direccion/Delete/' + idDireccion;
             });
-
-
-            //Cargando los selects
-            /*$(document).on("click", ".btnEditarDireccion", function () {
-
-            var idDireccion = $(this).data("id");
-
-            fetch('/Usuario/Direccion/GetById' + idDireccion)
-                .then(response => response.json())
-                .then(data => {
-
-                    if (data.correct) {
-
-                        var direccion = data.object;
-
-                        $("#idDireccion").val(direccion.IdDireccion);
-                        $("#calle").val(direccion.Calle);
-                        $("#numeroInterior").val(direccion.NumeroInterior);
-                        $("#numeroExterior").val(direccion.NumeroExterior);
-                        $("#codigoPostal").val(direccion.Colonia.CodigoPostal);
-
-                        var idPais = direccion.Colonia.Municipio.Estado.Pais.IdPais;
-                        var idEstado = direccion.Colonia.Municipio.Estado.IdEstado;
-                        var idMunicipio = direccion.Colonia.Municipio.IdMunicipio;
-                        var idColonia = direccion.Colonia.IdColonia;
-
-                        $("#pais").val(idPais);
-
-                        // Cargar estados
-                        $.get('/Usuario/estado/getByPais/' + idPais, function (result) {
-
-                            if (result.correct) {
-
-                                $("#estado").empty();
-
-                                $.each(result.objects, function (i, estado) {
-                                    $("#estado").append(
-                                        '<option value="' + estado.IdEstado + '">' + estado.Nombre + '</option>'
-                                    );
-                                });
-
-                                $("#estado").val(idEstado);
-
-                                // Cargar municipios
-                                $.get('/Usuario/municipio/getByEstado/' + idEstado, function (result2) {
-
-                                    if (result2.correct) {
-
-                                        $("#municipio").empty();
-
-                                        $.each(result2.objects, function (i, municipio) {
-                                            $("#municipio").append(
-                                                '<option value="' + municipio.IdMunicipio + '">' + municipio.Nombre + '</option>'
-                                            );
-                                        });
-
-                                        $("#municipio").val(idMunicipio);
-
-                                        // Cargar colonias
-                                        $.get('/Usuario/colonia/getByMunicipio/' + idMunicipio, function (result3) {
-
-                                            if (result3.correct) {
-
-                                                $("#colonia").empty();
-
-                                                $.each(result3.objects, function (i, colonia) {
-                                                    $("#colonia").append(
-                                                        '<option value="' + colonia.IdColonia + '">' + colonia.Nombre + '</option>'
-                                                    );
-                                                });
-
-                                                $("#colonia").val(idColonia);
-
-
-                                                var modal = new bootstrap.Modal(document.getElementById('EditarDireccion'));
-                                                modal.show();
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-        });
-            $(document).ready(function () {
-
-                configurarCascada("Agregar");
-
-            });
-            
-            $(document).ready(function(){
-                
-                $("#pais").change(function(){
-                    
-                    var idPais = $("#pais").val();
-
-                    if (idPais && idPais !== "0") {
-
-                        $("#estado").empty().append('<option value="">Selecciona...</option>');
-                        $("#municipio").empty().append('<option value="">Selecciona...</option>');
-                        $("#colonia").empty().append('<option value="">Selecciona...</option>');
-
-                        $.ajax({
-                            url: '/Usuario/estado/getByPais/' + idPais,
-                            type: 'GET',
-                            success: function (result) {
-
-                                if (result.correct) {
-                                    $.each(result.objects, function (i, estado) {
-                                        $("#estado").append(
-                                            '<option value="' + estado.IdEstado + '">' 
-                                            + estado.Nombre + 
-                                            '</option>'
-                                        );
-                                    });
-                                }
-                            },
-                            error: function () {
-                                alert("Error al cargar los estados");
-                            }
-                        });
-
-                    } else {
-
-                        $("#estado").empty().append('<option value="0" selected>Selecciona...</option>');
-                        $("#municipio").empty().append('<option value="0" selected>Selecciona...</option>');
-                        $("#colonia").empty().append('<option value="0" selected>Selecciona...</option>');
-                    }
-                    
-                });
-                $("#estado").change(function () {
-
-                var idEstado = $("#estado").val();
-
-                if (idEstado && idEstado !== "0") {
-
-                    $("#municipio").empty().append('<option value="">Selecciona...</option>');
-                    $("#colonia").empty().append('<option value="">Selecciona...</option>');
-
-                    $.ajax({
-                        url: '/Usuario/municipio/getByEstado/' + idEstado,
-                        type: 'GET',
-                        success: function (result) {
-
-                            if (result.correct) {
-                                $.each(result.objects, function (i, municipio) {
-                                    $("#municipio").append(
-                                        '<option value="' + municipio.IdMunicipio + '">' 
-                                        + municipio.Nombre + 
-                                        '</option>'
-                                    );
-                                });
-                            }
-                        },
-                        error: function () {
-                            alert("Error al cargar los municipios");
-                        }
-                    });
-                } else {
-
-                    $("#municipio").empty().append('<option value="0" selected>Selecciona...</option>');
-                    $("#colonia").empty().append('<option value="0" selected>Selecciona...</option>');
-                }
-            });
-
-            $("#municipio").change(function () {
-
-                var idMunicipio = $("#municipio").val();
-
-                if (idMunicipio && idMunicipio !== "0") {
-
-                    $("#colonia").empty().append('<option value="">Selecciona...</option>');
-
-                    $.ajax({
-                        url: '/Usuario/colonia/getByMunicipio/' + idMunicipio,
-                        type: 'GET',
-                        success: function (result) {
-
-                            if (result.correct) {
-                                $.each(result.objects, function (i, colonia) {
-                                    $("#colonia").append(
-                                        '<option value="' + colonia.IdColonia + '">' 
-                                        + colonia.Nombre + 
-                                        '</option>'
-                                    );
-                                });
-                            }
-                        },
-                        error: function () {
-                            alert("Error al cargar las colonias");
-                        }
-                    });
-
-                } else {
-
-                    $("#colonia").empty().append('<option value="0" selected>Selecciona...</option>');
-                }
-            });
-        });*/
-        
-        
         </script>
         <script th:if="${success}">
     Swal.fire({
