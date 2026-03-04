@@ -1,10 +1,15 @@
 package com.digis01.AMorenoProgramacionNCapasMaven.Demo;
 
-import com.digis01.AMorenoProgramacionNCapasMaven.DAO.ColoniaDAOImplementacion;
-import com.digis01.AMorenoProgramacionNCapasMaven.DAO.EstadoDAOImplementacion;
-import com.digis01.AMorenoProgramacionNCapasMaven.DAO.MunicipioDAOImplementacion;
-import com.digis01.AMorenoProgramacionNCapasMaven.DAO.PaisDAOImplementacion;
-import com.digis01.AMorenoProgramacionNCapasMaven.DAO.RolDAOImplementacion;
+//import com.digis01.AMorenoProgramacionNCapasMaven.DAO.ColoniaDAOImplementacion;
+import com.digis01.AMorenoProgramacionNCapasMaven.DAO.ColoniaDAOJPAImplementacion;
+//import com.digis01.AMorenoProgramacionNCapasMaven.DAO.EstadoDAOImplementacion;
+import com.digis01.AMorenoProgramacionNCapasMaven.DAO.EstadoDAOJPAImplementacion;
+//import com.digis01.AMorenoProgramacionNCapasMaven.DAO.MunicipioDAOImplementacion;
+import com.digis01.AMorenoProgramacionNCapasMaven.DAO.MunicipioDAOJPAImplementacion;
+//import com.digis01.AMorenoProgramacionNCapasMaven.DAO.PaisDAOImplementacion;
+import com.digis01.AMorenoProgramacionNCapasMaven.DAO.PaisDAOJPAImplementacion;
+//import com.digis01.AMorenoProgramacionNCapasMaven.DAO.RolDAOImplementacion;
+import com.digis01.AMorenoProgramacionNCapasMaven.DAO.RolDAOJPAImplementacion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Result;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Usuario;
 import com.digis01.AMorenoProgramacionNCapasMaven.DAO.UsuarioDAOImplementacion;
@@ -12,6 +17,8 @@ import com.digis01.AMorenoProgramacionNCapasMaven.DAO.UsuarioDAOJPAImplementacio
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Colonia;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Direccion;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.ErroresArchivo;
+import com.digis01.AMorenoProgramacionNCapasMaven.ML.Estado;
+import com.digis01.AMorenoProgramacionNCapasMaven.ML.Municipio;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Pais;
 import com.digis01.AMorenoProgramacionNCapasMaven.ML.Rol;
 import com.digis01.AMorenoProgramacionNCapasMaven.Services.ValidationService;
@@ -83,12 +90,11 @@ class UsuarioController {
 //
 //        return "Usuario";
 //    }
-    @Autowired
-    private PaisDAOImplementacion pais;
-
-    @Autowired
-    private RolDAOImplementacion rol;
-
+//    @Autowired
+//    private PaisDAOImplementacion pais;
+//
+//    @Autowired
+//    private RolDAOImplementacion rol;
     @GetMapping("Form")
     public String Formulario(Model model) {
 
@@ -98,8 +104,8 @@ class UsuarioController {
 
         model.addAttribute("usuario", usuario);
 
-        Result resultPais = pais.GetAll();
-        Result resultRol = rol.GetAll();
+        Result resultPais = paisJPA.GetAll();
+        Result resultRol = rolJPA.GetAll();
 
         if (resultPais.correct) {
             model.addAttribute("paises", resultPais.objects);
@@ -117,44 +123,112 @@ class UsuarioController {
         }
         return "Formulario";
     }
-    
-   @Autowired
-   private UsuarioDAOJPAImplementacion daoJPA;
+
+    @Autowired
+    private UsuarioDAOJPAImplementacion daoJPA;
+
+    @Autowired
+    private RolDAOJPAImplementacion rolJPA;
+
+    @Autowired
+    private PaisDAOJPAImplementacion paisJPA;
 
     @GetMapping()
     public String GetAll(Model model) {
 
         Result<Usuario> result = daoJPA.GetAll();
+        Result<Rol> resultRol = rolJPA.GetAll();
+        Result<Pais> resultPais = paisJPA.GetAll();
 
         if (result.correct) {
             model.addAttribute("usuarios", result.objects);
         } else {
             model.addAttribute("error", result.errorMessage);
         }
+        if (resultRol.correct) {
+            model.addAttribute("roles", resultRol.objects);
+        }
+        if (resultPais.correct) {
+            model.addAttribute("paises", resultPais.objects);
+        }
 
         return "Usuario";
     }
-
+    
+//    @PostMapping("Form")
+//    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult, @RequestParam("imagenFile") MultipartFile imagenFile,RedirectAttributes redirectAttributes, Model model){
+//
+//        if (bindingResult.hasErrors()) {
+//
+//            Result resultRol = rol.GetAll();
+//            Result resultPais = pais.GetAll();
+//
+//            model.addAttribute("roles", resultRol.objects);
+//            model.addAttribute("paises", resultPais.objects);
+//
+//            return "Formulario";
+//        }
+//
+//        try {
+//            if (imagenFile != null && !imagenFile.isEmpty()) {
+//
+//                String nombreArchivo = imagenFile.getOriginalFilename();
+//
+//                String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf(".") + 1).toLowerCase();
+//
+//                if (extension.equals("jpg") || extension.equals("png")) {
+//
+//                    byte[] arregloBytes = imagenFile.getBytes();
+//                    String base64Img = Base64.getEncoder().encodeToString(arregloBytes);
+//
+//                    usuario.setImagen(base64Img);
+//
+//                } else {
+//                    System.out.println("Formato no válido");
+//                    usuario.setImagen(null);
+//                }
+//
+//            } else {
+//               
+//                usuario.setImagen(null);
+//            }
+//
+//          
+//            Result result = dao.Add(usuario);
+//
+//            if (result.correct) {
+//                redirectAttributes.addFlashAttribute("success", true);
+//                return "redirect:/Usuario";
+//            } else {
+//                redirectAttributes.addFlashAttribute("error", true);
+//                return "redirect:/Usuario";
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return "Formulario";
+//        }
+//    }
+    
     @PostMapping("Form")
-    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult, @RequestParam("imagenFile") MultipartFile imagenFile,RedirectAttributes redirectAttributes, Model model){
+    public String ADD(@Valid @ModelAttribute("usuario") Usuario usuario, BindingResult bindingResult, @RequestParam("imagenFile") MultipartFile imagenFile, RedirectAttributes redirectAttributes, Model model) {
 
         if (bindingResult.hasErrors()) {
 
-            Result resultRol = rol.GetAll();
-            Result resultPais = pais.GetAll();
-
-            model.addAttribute("roles", resultRol.objects);
-            model.addAttribute("paises", resultPais.objects);
+            model.addAttribute("roles", rolJPA.GetAll().objects);
+            model.addAttribute("paises", paisJPA.GetAll().objects);
 
             return "Formulario";
         }
 
         try {
+
             if (imagenFile != null && !imagenFile.isEmpty()) {
 
                 String nombreArchivo = imagenFile.getOriginalFilename();
-
-                String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf(".") + 1).toLowerCase();
+                String extension = nombreArchivo
+                        .substring(nombreArchivo.lastIndexOf(".") + 1)
+                        .toLowerCase();
 
                 if (extension.equals("jpg") || extension.equals("png")) {
 
@@ -164,32 +238,29 @@ class UsuarioController {
                     usuario.setImagen(base64Img);
 
                 } else {
-                    System.out.println("Formato no válido");
                     usuario.setImagen(null);
                 }
 
             } else {
-               
                 usuario.setImagen(null);
             }
 
-          
-            Result result = dao.Add(usuario);
+            Result<com.digis01.AMorenoProgramacionNCapasMaven.ML.Usuario> result = daoJPA.Add(usuario);
 
             if (result.correct) {
                 redirectAttributes.addFlashAttribute("success", true);
-                return "redirect:/Usuario";
             } else {
                 redirectAttributes.addFlashAttribute("error", true);
-                return "redirect:/Usuario";
             }
+
+            return "redirect:/Usuario";
 
         } catch (Exception e) {
             e.printStackTrace();
             return "Formulario";
         }
     }
-    
+
     @GetMapping("/Search")
     public String Search(@RequestParam(required = false) String nombre, @RequestParam(required = false) String apellidoPaterno, @RequestParam(required = false) String apellidoMaterno, @RequestParam(required = false) Integer idRol, Model model) {
 
@@ -197,12 +268,12 @@ class UsuarioController {
 
         model.addAttribute("usuarios", result.objects);
 
-        Result resultRol = rol.GetAll();
+        Result resultRol = rolJPA.GetAll();
         model.addAttribute("roles", resultRol.objects);
 
         return "Usuario";
     }
-    
+
     @Autowired
     private UsuarioDAOImplementacion dao;
 
@@ -229,71 +300,89 @@ class UsuarioController {
 //
 //        return "Usuario";
 //    }
-    
     @GetMapping("/getById")
     @ResponseBody
-    public Result GetById(@RequestParam int idUsuario){
+    public Result GetById(@RequestParam int idUsuario) {
         return dao.GetById(idUsuario);
     }
-    
+
     @GetMapping("/EditarUsuario")
-    public String EditarUsuario(Model model){
+    public String EditarUsuario(Model model) {
         return "EditarUsuario";
     }
-    
+
     @PostMapping("/Update")
     @ResponseBody
     public Result Update(@RequestBody Usuario usuario) {
         return dao.Update(usuario);
     }
-    
+
     @PostMapping("/Direccion/Add")
     @ResponseBody
     public Result AddDireccion(@RequestBody Direccion direccion) {
         return dao.AddDireccion(direccion);
     }
-    
+
     @PostMapping("/Update/Direccion")
     @ResponseBody
     public Result UpdateDireccion(@RequestBody Direccion direccion) {
         return dao.UpdateDireccion(direccion);
     }
+
+//    @PostMapping("/Delete/{idUsuario}")
+//    @ResponseBody
+//    public Result Delete(@PathVariable int idUsuario) {
+//        return dao.Delete(idUsuario);
+//    }
     
     @PostMapping("/Delete/{idUsuario}")
     @ResponseBody
-    public Result Delete(@PathVariable int idUsuario){
-        return dao.Delete(idUsuario);
+    public Result Delete(@PathVariable int idUsuario){        
+        return daoJPA.DeleteUser(idUsuario);
     }
-    
+
     @GetMapping("/Direccion/GetById")
     @ResponseBody
     public Result GetByIdDireccion(@RequestParam int idDireccion) {
         return dao.GetByIdDireccion(idDireccion);
     }
-    
+
+//    @GetMapping("/Direccion/Delete/{idDireccion}")
+//    public String DeleteDireccion(@PathVariable int idDireccion) {
+//        dao.DeleteDireccion(idDireccion);
+//        return "redirect:/Usuario";
+//    }
     @GetMapping("/Direccion/Delete/{idDireccion}")
-    public String DeleteDireccion(@PathVariable int idDireccion){
-        dao.DeleteDireccion(idDireccion);
-        return "redirect:/Usuario";
+    public String DeleteDireccion(@PathVariable int idDireccion, RedirectAttributes redirectAttributes) {
+
+    Result result = daoJPA.Delete(idDireccion);
+
+    if (result.correct) {
+        redirectAttributes.addFlashAttribute("successDireccion", true);
+    } else {
+        redirectAttributes.addFlashAttribute("errorDireccion", true);
     }
-    
+
+    return "redirect:/Usuario";
+}
+
     @PostMapping("/Imagen/Update")
     @ResponseBody
-    public Result UpdateImagen(@RequestParam("idUsuario") int idUsuario, @RequestParam("imagenFile") MultipartFile imagenFile){
+    public Result UpdateImagen(@RequestParam("idUsuario") int idUsuario, @RequestParam("imagenFile") MultipartFile imagenFile) {
         Result result = new Result();
-        
+
         try {
             if (imagenFile != null && !imagenFile.isEmpty()) {
                 if (imagenFile.getContentType().startsWith("image/")) {
                     byte[] arregloBytes = imagenFile.getBytes();
                     String base64Img = Base64.getEncoder().encodeToString(arregloBytes);
-                    
+
                     result = dao.UpdateImagen(idUsuario, base64Img);
-                }else{
+                } else {
                     result.correct = false;
                     result.errorMessage = "Formato no valido";
                 }
-            }else {
+            } else {
                 result.correct = false;
                 result.errorMessage = "No se selecciono ninguna imagen";
             }
@@ -302,14 +391,14 @@ class UsuarioController {
             result.errorMessage = ex.getLocalizedMessage();
             result.ex = ex;
         }
-        
-        return result;     
+
+        return result;
     }
-    
+
     @PostMapping("/Estatus/Update")
     @ResponseBody
     public Result UpdateEstatus(@RequestParam("idUsuario") int idUsuario, @RequestParam("estatus") int estatus) {
-        
+
         Result result = new Result();
 
         try {
@@ -324,15 +413,15 @@ class UsuarioController {
 
         return result;
     }
-    
+
     @GetMapping("/CargaMasiva")
-    public String cargaMasiva(){
+    public String cargaMasiva() {
         return "CargaMasiva";
     }
-    
+
     @PostMapping("/CargaMasiva")
     public String CargaMasiva(@RequestParam("archivo") MultipartFile archivo, Model model, HttpSession session) {
-        
+
         try {
             if (archivo != null) {
 
@@ -379,46 +468,45 @@ class UsuarioController {
         }
         return "CargaMasiva";
     }
-    
+
     @PostMapping("/ProcesarCargaMasiva/{uuid}")
-    public String ProcesarCargaMasiva(@PathVariable String uuid, RedirectAttributes redirectAttributes, HttpSession session){
-           
+    public String ProcesarCargaMasiva(@PathVariable String uuid, RedirectAttributes redirectAttributes, HttpSession session) {
+
         try {
             List<Usuario> usuarios = (List<Usuario>) session.getAttribute(uuid);
-            
+
             if (usuarios == null) {
                 redirectAttributes.addFlashAttribute("mensajeError", "No se encontro informaacion para procesar");
-                
+
                 return "redirect:/Usuario/CargaMasiva";
             }
             Result result = dao.AddAll(usuarios);
             if (result.correct) {
                 session.removeAttribute(uuid);
                 redirectAttributes.addFlashAttribute("mensajeCorrecto", "Carga Masiva procesada correctamente");
-                
+
                 return "redirect:/Usuario";
-            }else {
+            } else {
                 redirectAttributes.addFlashAttribute("mensajeError", result.errorMessage);
-                
+
                 return "redirect:/Usuario/CargaMasiva";
             }
         } catch (Exception ex) {
-            redirectAttributes.addFlashAttribute("mensajeError",ex.getMessage());
+            redirectAttributes.addFlashAttribute("mensajeError", ex.getMessage());
 
             return "redirect:/Usuario/CargaMasiva";
-        }      
+        }
     }
-    
+
     public List<Usuario> LecturaArchivoTxt(File archivo) {
         List<Usuario> usuarios = null;
         //try with reouces - Garbage collector
-        try(InputStream inputStream = new FileInputStream(archivo);
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))){
-                   
+        try (InputStream inputStream = new FileInputStream(archivo); BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+
             usuarios = new ArrayList<>();
             String cadena = "";
             int fila = 1;
-            while ((cadena = bufferedReader.readLine()) != null) {                
+            while ((cadena = bufferedReader.readLine()) != null) {
                 String[] datosUsuario = cadena.split("\\|");
                 Usuario usuario = new Usuario();
                 usuario.setRol(new Rol());
@@ -428,11 +516,11 @@ class UsuarioController {
                 usuario.setApellidoPaterno(datosUsuario[1]);
                 usuario.setApellidoMaterno(datosUsuario[2]);
                 usuario.setEmail(datosUsuario[3]);
-                
+
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 LocalDate fecha = LocalDate.parse(datosUsuario[4], formatter);
                 usuario.setFechaNacimiento(fecha);
-                
+
                 usuario.setPassword(datosUsuario[5]);
                 usuario.setSexo(datosUsuario[6]);
                 usuario.setTelefono(datosUsuario[7]);
@@ -444,30 +532,29 @@ class UsuarioController {
                 usuario.getdireccion().setNumeroInterior(datosUsuario[13]);
                 usuario.getdireccion().setNumeroExterior(datosUsuario[14]);
                 usuario.getColonia().setIdColonia(Integer.parseInt(datosUsuario[15]));
-                
+
                 usuarios.add(usuario);
                 fila++;
-            }         
-        }catch(Exception ex){
+            }
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
-        
+
         return usuarios;
     }
-    
+
     public List<Usuario> LecturaArchivoXLSX(File archivo) {
 
         List<Usuario> usuarios = new ArrayList<>();
 
-        try (FileInputStream fis = new FileInputStream(archivo);
-             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+        try (FileInputStream fis = new FileInputStream(archivo); XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
 
             XSSFSheet sheet = workbook.getSheetAt(0);
             DataFormatter dataFormatter = new DataFormatter();
 
             int fila = 1;
 
-            for (Row row : sheet) {          
+            for (Row row : sheet) {
                 Usuario usuario = new Usuario();
                 usuario.setRol(new Rol());
                 usuario.setdireccion(new Direccion());
@@ -522,11 +609,11 @@ class UsuarioController {
 
         return usuarios;
     }
-    
+
     @Autowired
     private ValidationService validationService;
-    
-    public List<ErroresArchivo> ValidarDatos(List<Usuario> usuarios){
+
+    public List<ErroresArchivo> ValidarDatos(List<Usuario> usuarios) {
 
         List<ErroresArchivo> errores = new ArrayList<>();
 
@@ -556,31 +643,55 @@ class UsuarioController {
 
         return errores;
     }
-    
+
+//    @Autowired
+//    private EstadoDAOImplementacion estado;
+//
+//    @GetMapping("/estado/getByPais/{idPais}")
+//    @ResponseBody
+//    public Result getEstadosByPais(@PathVariable int idPais) {
+//        return estado.GetAll(idPais);
+//    }
     @Autowired
-    private EstadoDAOImplementacion estado;
+    private EstadoDAOJPAImplementacion estadoJPA;
 
     @GetMapping("/estado/getByPais/{idPais}")
     @ResponseBody
-    public Result getEstadosByPais(@PathVariable int idPais) {
-        return estado.GetAll(idPais);
+    public Result<Estado> getEstadosByPais(@PathVariable int idPais) {
+        return estadoJPA.GetAll(idPais);
     }
+//    @Autowired
+//    private MunicipioDAOImplementacion municipio;
+//    
+//    @GetMapping("/municipio/getByEstado/{idEstado}")
+//    @ResponseBody
+//    public Result getMunicipiosByEstado(@PathVariable int idEstado){
+//        return municipio.GetAll(idEstado);
+//    }
 
     @Autowired
-    private MunicipioDAOImplementacion municipio;
-    
+    private MunicipioDAOJPAImplementacion municipioJPA;
+
     @GetMapping("/municipio/getByEstado/{idEstado}")
     @ResponseBody
-    public Result getMunicipiosByEstado(@PathVariable int idEstado){
-        return municipio.GetAll(idEstado);
+    public Result<Municipio> getMunicipiosByEstado(@PathVariable int idEstado) {
+        return municipioJPA.GetAll(idEstado);
     }
-    
+
+//    @Autowired
+//    private ColoniaDAOImplementacion colonia;
+//    
+//    @GetMapping("/colonia/getByMunicipio/{idMunicipio}")
+//    @ResponseBody
+//    public Result getColoniasByMunicipio(@PathVariable int idMunicipio){
+//        return colonia.GetAll(idMunicipio);
+//    }
     @Autowired
-    private ColoniaDAOImplementacion colonia;
-    
+    private ColoniaDAOJPAImplementacion coloniaJPA;
+
     @GetMapping("/colonia/getByMunicipio/{idMunicipio}")
     @ResponseBody
-    public Result getColoniasByMunicipio(@PathVariable int idMunicipio){
-        return colonia.GetAll(idMunicipio);
+    public Result getColoniasByMunicipio(@PathVariable int idMunicipio) {
+        return coloniaJPA.GetAll(idMunicipio);
     }
 }

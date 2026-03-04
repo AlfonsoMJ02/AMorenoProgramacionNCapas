@@ -71,8 +71,8 @@ public class Usuario {
 
     @OneToMany(mappedBy = "Usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Direccion> Direcciones;
-
     
+     
     public int getEstatus() {
         return Estatus;
     }

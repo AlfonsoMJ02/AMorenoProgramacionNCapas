@@ -1,6 +1,7 @@
 package com.digis01.AMorenoProgramacionNCapasMaven.Configuration;
 
 import javax.sql.DataSource;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,10 +23,10 @@ public class DataSourceConfig {
         return dataSource;
     }
     
-//    @Bean 
-//    public ModelMapper modelMappper(){
-//        return new ModelMapper();
-//    }
+    @Bean 
+    public ModelMapper modelMappper(){
+        return new ModelMapper();
+    }
     
 //    @Bean
 //    public DataSource dataSource() {

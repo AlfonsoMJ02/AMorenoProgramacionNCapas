@@ -11,6 +11,7 @@ public class Municipio {
     @Id
     @Column(name = "idmunicipio")
     private int IdMunicipio;
+    @Column(name = "nombre")
     private String Nombre;
     
     public Municipio(){

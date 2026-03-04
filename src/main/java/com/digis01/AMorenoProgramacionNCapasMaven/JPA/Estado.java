@@ -11,6 +11,8 @@ public class Estado {
     @Id
     @Column(name = "idestado")
     private int IdEstado;
+    
+    @Column(name = "nombre")
     private String Nombre;
     
     @ManyToOne
