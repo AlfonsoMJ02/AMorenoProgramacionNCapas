@@ -422,43 +422,47 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
 
                     <!-- Busqueda -->
-                    <form class="d-flex gap-2 align-items-center">
+                    <form class="d-flex gap-2 align-items-center"
+                        th:action="@{/Usuario/Search}"
+                        method="get">
 
-                        <input type="text"
-                               class="form-control form-control-sm"
-                               placeholder="Nombre"
-                               id="buscarNombre"
-                               style="width:150px;">
+                      <input type="text"
+                             class="form-control form-control-sm"
+                             placeholder="Nombre"
+                             name="nombre"
+                             style="width:150px;">
 
-                        <input type="text"
-                               class="form-control form-control-sm"
-                               placeholder="Apellido Paterno"
-                               id="buscarApellidoPaterno"
-                               style="width:170px;">
+                      <input type="text"
+                             class="form-control form-control-sm"
+                             placeholder="Apellido Paterno"
+                             name="apellidoPaterno"
+                             style="width:170px;">
 
-                        <input type="text"
-                               class="form-control form-control-sm"
-                               placeholder="Apellido Materno"
-                               id="buscarApellidoMaterno"
-                               style="width:170px;">
+                      <input type="text"
+                             class="form-control form-control-sm"
+                             placeholder="Apellido Materno"
+                             name="apellidoMaterno"
+                             style="width:170px;">
 
-                        <select class="form-select form-select-sm"
-                                id="buscarRol"
-                                style="width:170px;">
-                            <option value="0">Roles</option>
-                            <option th:each="rol : ${roles}"
-                                    th:value="${rol.idRol}"
-                                    th:text="${rol.nombre}">
-                            </option>
-                        </select>
-                                                
-                        <button type="button"
-                                class="btn btn-outline-primary btn-sm"
-                                id="btnBuscar">
-                            <i class="bi bi-search"></i>
-                        </button>
+                      <select class="form-select form-select-sm"
+                              name="idRol"
+                              style="width:170px;">
 
-                    </form>                    
+                          <option value="">Roles</option>
+
+                          <option th:each="rol : ${roles}"
+                                  th:value="${rol.idRol}"
+                                  th:text="${rol.nombre}">
+                          </option>
+
+                      </select>
+
+                      <button type="submit"
+                              class="btn btn-outline-primary btn-sm">
+                          <i class="bi bi-search"></i>
+                      </button>
+
+                  </form>                   
                     
                     <a href="Usuario/Form" class="btn btn-success">
                         <i class="bi bi-person-plus-fill"></i> Agregar
@@ -817,97 +821,97 @@
             //Editar direccion Modal
             var modalEditarDireccion = document.getElementById('EditarDireccion');
 
-modalEditarDireccion.addEventListener('show.bs.modal', function (event) {
+            modalEditarDireccion.addEventListener('show.bs.modal', function (event) {
 
-    var button = event.relatedTarget;
-    var idDireccion = button.getAttribute('data-id');
+                var button = event.relatedTarget;
+                var idDireccion = button.getAttribute('data-id');
 
-    fetch('/Usuario/Direccion/GetById/' + idDireccion)
-        .then(response => response.json())
-        .then(data => {
+                fetch('/Usuario/Direccion/GetById/' + idDireccion)
+                    .then(response => response.json())
+                    .then(data => {
 
-            console.log(data);
+                        console.log(data);
 
-            if (data.correct) {
+                        if (data.correct) {
 
-                var d = data.object;
+                            var d = data.object;
 
-                // Datos básicos
-                $("#idDireccion").val(d.IdDireccion);
-                $("#calle").val(d.Calle);
-                $("#numeroInterior").val(d.NumeroInterior);
-                $("#numeroExterior").val(d.NumeroExterior);
-                $("#codigoPostal").val(d.Colonia.CodigoPostal);
+                            // Datos básicos
+                            $("#idDireccion").val(d.IdDireccion);
+                            $("#calle").val(d.Calle);
+                            $("#numeroInterior").val(d.NumeroInterior);
+                            $("#numeroExterior").val(d.NumeroExterior);
+                            $("#codigoPostal").val(d.Colonia.CodigoPostal);
 
-                var idPais = d.Colonia.Municipio.Estado.Pais.IdPais;
-                var idEstado = d.Colonia.Municipio.Estado.IdEstado;
-                var idMunicipio = d.Colonia.Municipio.IdMunicipio;
-                var idColonia = d.Colonia.IdColonia;
+                            var idPais = d.Colonia.Municipio.Estado.Pais.IdPais;
+                            var idEstado = d.Colonia.Municipio.Estado.IdEstado;
+                            var idMunicipio = d.Colonia.Municipio.IdMunicipio;
+                            var idColonia = d.Colonia.IdColonia;
 
-                // Seleccionar país
-                $("#pais").val(idPais);
+                            // Seleccionar país
+                            $("#pais").val(idPais);
 
-                // Cargar estados
-                $.get('/Usuario/estado/getByPais/' + idPais, function (result) {
+                            // Cargar estados
+                            $.get('/Usuario/estado/getByPais/' + idPais, function (result) {
 
-                    if (result.correct) {
+                                if (result.correct) {
 
-                        $("#estado").empty();
+                                    $("#estado").empty();
 
-                        $.each(result.objects, function (i, estado) {
-                            $("#estado").append(
-                                '<option value="' + estado.IdEstado + '">' + estado.Nombre + '</option>'
-                            );
-                        });
+                                    $.each(result.objects, function (i, estado) {
+                                        $("#estado").append(
+                                            '<option value="' + estado.IdEstado + '">' + estado.Nombre + '</option>'
+                                        );
+                                    });
 
-                        $("#estado").val(idEstado);
+                                    $("#estado").val(idEstado);
 
-                        // Cargar municipios
-                        $.get('/Usuario/municipio/getByEstado/' + idEstado, function (result2) {
+                                    // Cargar municipios
+                                    $.get('/Usuario/municipio/getByEstado/' + idEstado, function (result2) {
 
-                            if (result2.correct) {
+                                        if (result2.correct) {
 
-                                $("#municipio").empty();
+                                            $("#municipio").empty();
 
-                                $.each(result2.objects, function (i, municipio) {
-                                    $("#municipio").append(
-                                        '<option value="' + municipio.IdMunicipio + '">' + municipio.Nombre + '</option>'
-                                    );
-                                });
+                                            $.each(result2.objects, function (i, municipio) {
+                                                $("#municipio").append(
+                                                    '<option value="' + municipio.IdMunicipio + '">' + municipio.Nombre + '</option>'
+                                                );
+                                            });
 
-                                $("#municipio").val(idMunicipio);
+                                            $("#municipio").val(idMunicipio);
 
-                                // Cargar colonias
-                                $.get('/Usuario/colonia/getByMunicipio/' + idMunicipio, function (result3) {
+                                            // Cargar colonias
+                                            $.get('/Usuario/colonia/getByMunicipio/' + idMunicipio, function (result3) {
 
-                                    if (result3.correct) {
+                                                if (result3.correct) {
 
-                                        $("#colonia").empty();
+                                                    $("#colonia").empty();
 
-                                        $.each(result3.objects, function (i, colonia) {
-                                            $("#colonia").append(
-                                                '<option value="' + colonia.IdColonia + '">' + colonia.Nombre + '</option>'
-                                            );
-                                        });
+                                                    $.each(result3.objects, function (i, colonia) {
+                                                        $("#colonia").append(
+                                                            '<option value="' + colonia.IdColonia + '">' + colonia.Nombre + '</option>'
+                                                        );
+                                                    });
 
-                                        $("#colonia").val(idColonia);
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+                                                    $("#colonia").val(idColonia);
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
 
-            } else {
-                alert("No se pudo cargar la dirección");
-            }
+                        } else {
+                            alert("No se pudo cargar la dirección");
+                        }
 
-        })
-        .catch(error => {
-            console.error("Error:", error);
-        });
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
 
-});
+            });
             
             //Modal agregar direccion
             var modalAgregar = document.getElementById('AgregarDireccion');

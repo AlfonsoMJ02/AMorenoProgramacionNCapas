@@ -529,9 +529,9 @@ public class UsuarioDAOImplementacion implements IUsuario{
                     (CallableStatementCallback<Boolean>) callableStatement -> {
                     
                         callableStatement.registerOutParameter(1, oracle.jdbc.OracleTypes.CURSOR);
-                        callableStatement.setString(2, nombre);
-                        callableStatement.setString(3, apellidoPaterno);
-                        callableStatement.setString(4, apellidoMaterno);
+                        callableStatement.setString(2, nombre == null || nombre.isEmpty() ? null : nombre);
+                        callableStatement.setString(3, apellidoPaterno == null || apellidoPaterno.isEmpty() ? null : apellidoPaterno);
+                        callableStatement.setString(4, apellidoMaterno == null || apellidoMaterno.isEmpty() ? null : apellidoMaterno);
                         if (idRol != null) {
                             callableStatement.setInt(5, idRol);
                         }else {

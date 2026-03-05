@@ -76,7 +76,6 @@ public class Usuario {
     @JsonIgnore
     private List<Direccion> Direcciones;
     
-     
     public int getEstatus() {
         return Estatus;
     }

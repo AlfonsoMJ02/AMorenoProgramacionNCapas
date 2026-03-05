@@ -95,6 +95,7 @@ class UsuarioController {
 //
 //    @Autowired
 //    private RolDAOImplementacion rol;
+    
     @GetMapping("Form")
     public String Formulario(Model model) {
 
@@ -261,10 +262,23 @@ class UsuarioController {
         }
     }
 
+//    @GetMapping("/Search")
+//    public String Search(@RequestParam(required = false) String nombre, @RequestParam(required = false) String apellidoPaterno, @RequestParam(required = false) String apellidoMaterno, @RequestParam(required = false) Integer idRol, Model model) {
+//
+//        Result result = dao.Search(nombre, apellidoPaterno, apellidoMaterno, idRol);
+//
+//        model.addAttribute("usuarios", result.objects);
+//
+//        Result resultRol = rolJPA.GetAll();
+//        model.addAttribute("roles", resultRol.objects);
+//
+//        return "Usuario";
+//    }
+    
     @GetMapping("/Search")
     public String Search(@RequestParam(required = false) String nombre, @RequestParam(required = false) String apellidoPaterno, @RequestParam(required = false) String apellidoMaterno, @RequestParam(required = false) Integer idRol, Model model) {
 
-        Result result = dao.Search(nombre, apellidoPaterno, apellidoMaterno, idRol);
+        Result result = daoJPA.Search(nombre, apellidoPaterno, apellidoMaterno, idRol);
 
         model.addAttribute("usuarios", result.objects);
 
@@ -300,21 +314,34 @@ class UsuarioController {
 //
 //        return "Usuario";
 //    }
+    
+//    @GetMapping("/getById")
+//    @ResponseBody
+//    public Result GetById(@RequestParam int idUsuario) {
+//        return dao.GetById(idUsuario);
+//    }
+    
     @GetMapping("/getById")
     @ResponseBody
-    public Result GetById(@RequestParam int idUsuario) {
-        return dao.GetById(idUsuario);
+    public Result GetById(@RequestParam int idUsuario){
+        return daoJPA.GetById(idUsuario);
     }
-
+    
     @GetMapping("/EditarUsuario")
     public String EditarUsuario(Model model) {
         return "EditarUsuario";
     }
 
+//    @PostMapping("/Update")
+//    @ResponseBody
+//    public Result Update(@RequestBody Usuario usuario) {
+//        return dao.Update(usuario);
+//    }
+    
     @PostMapping("/Update")
     @ResponseBody
     public Result Update(@RequestBody Usuario usuario) {
-        return dao.Update(usuario);
+        return daoJPA.UpdateUser(usuario);
     }
 
 //    @PostMapping("/Direccion/Add")
@@ -328,10 +355,16 @@ class UsuarioController {
         return daoJPA.AddDireccion(direccion);
     }
 
+//    @PostMapping("/Update/Direccion")
+//    @ResponseBody
+//    public Result UpdateDireccion(@RequestBody Direccion direccion) {
+//        return dao.UpdateDireccion(direccion);
+//    }
+    
     @PostMapping("/Update/Direccion")
     @ResponseBody
     public Result UpdateDireccion(@RequestBody Direccion direccion) {
-        return dao.UpdateDireccion(direccion);
+        return daoJPA.UpdateDireccion(direccion);
     }
     
     
@@ -365,6 +398,7 @@ class UsuarioController {
 //        dao.DeleteDireccion(idDireccion);
 //        return "redirect:/Usuario";
 //    }
+    
     @GetMapping("/Direccion/Delete/{idDireccion}")
     public String DeleteDireccion(@PathVariable int idDireccion, RedirectAttributes redirectAttributes) {
 
@@ -377,7 +411,36 @@ class UsuarioController {
     }
 
     return "redirect:/Usuario";
-}
+    }
+
+//    @PostMapping("/Imagen/Update")
+//    @ResponseBody
+//    public Result UpdateImagen(@RequestParam("idUsuario") int idUsuario, @RequestParam("imagenFile") MultipartFile imagenFile) {
+//        Result result = new Result();
+//
+//        try {
+//            if (imagenFile != null && !imagenFile.isEmpty()) {
+//                if (imagenFile.getContentType().startsWith("image/")) {
+//                    byte[] arregloBytes = imagenFile.getBytes();
+//                    String base64Img = Base64.getEncoder().encodeToString(arregloBytes);
+//
+//                    result = dao.UpdateImagen(idUsuario, base64Img);
+//                } else {
+//                    result.correct = false;
+//                    result.errorMessage = "Formato no valido";
+//                }
+//            } else {
+//                result.correct = false;
+//                result.errorMessage = "No se selecciono ninguna imagen";
+//            }
+//        } catch (Exception ex) {
+//            result.correct = false;
+//            result.errorMessage = ex.getLocalizedMessage();
+//            result.ex = ex;
+//        }
+//
+//        return result;
+//    }
 
     @PostMapping("/Imagen/Update")
     @ResponseBody
@@ -390,7 +453,7 @@ class UsuarioController {
                     byte[] arregloBytes = imagenFile.getBytes();
                     String base64Img = Base64.getEncoder().encodeToString(arregloBytes);
 
-                    result = dao.UpdateImagen(idUsuario, base64Img);
+                    result = daoJPA.UpdateImagen(idUsuario, base64Img);
                 } else {
                     result.correct = false;
                     result.errorMessage = "Formato no valido";
@@ -407,7 +470,26 @@ class UsuarioController {
 
         return result;
     }
-
+    
+//    @PostMapping("/Estatus/Update")
+//    @ResponseBody
+//    public Result UpdateEstatus(@RequestParam("idUsuario") int idUsuario, @RequestParam("estatus") int estatus) {
+//
+//        Result result = new Result();
+//
+//        try {
+//
+//            result = dao.UpdateEstatus(idUsuario, estatus);
+//
+//        } catch (Exception ex) {
+//            result.correct = false;
+//            result.errorMessage = ex.getLocalizedMessage();
+//            result.ex = ex;
+//        }
+//
+//        return result;
+//    }
+    
     @PostMapping("/Estatus/Update")
     @ResponseBody
     public Result UpdateEstatus(@RequestParam("idUsuario") int idUsuario, @RequestParam("estatus") int estatus) {
@@ -416,7 +498,7 @@ class UsuarioController {
 
         try {
 
-            result = dao.UpdateEstatus(idUsuario, estatus);
+            result = daoJPA.Estatus(idUsuario, estatus);
 
         } catch (Exception ex) {
             result.correct = false;
@@ -493,7 +575,7 @@ class UsuarioController {
 
                 return "redirect:/Usuario/CargaMasiva";
             }
-            Result result = dao.AddAll(usuarios);
+            Result result = daoJPA.AddAll(usuarios);
             if (result.correct) {
                 session.removeAttribute(uuid);
                 redirectAttributes.addFlashAttribute("mensajeCorrecto", "Carga Masiva procesada correctamente");
